@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<EntityDescriptor entityID="https://sso-shibboleth-test.its.rmit.edu.au/idp/shibboleth" xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:shibmd="urn:mace:shibboleth:metadata:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <IDPSSODescriptor WantAuthnRequestsSigned="true" protocolSupportEnumeration="urn:mace:shibboleth:1.0 urn:oasis:names:tc:SAML:1.1:protocol urn:oasis:names:tc:SAML:2.0:protocol">
+    <Extensions>
+      <shibmd:Scope regexp="false">rmit.edu.au</shibmd:Scope>
+    </Extensions>
+    <KeyDescriptor>
+      <ds:KeyInfo>
+        <ds:X509Data>
+          <ds:X509Certificate>
+            MIIDeTCCAmGgAwIBAgIUNoa8fSgtXacpLdBT8rycpFXvfLMwDQYJKoZIhvcNAQEF
+            BQAwLjEsMCoGA1UEAxMjc3NvLXNoaWJib2xldGgtdGVzdC5pdHMucm1pdC5lZHUu
+            YXUwHhcNMTExMDE4MjM0MDM4WhcNMzExMDE4MjM0MDM4WjAuMSwwKgYDVQQDEyNz
+            c28tc2hpYmJvbGV0aC10ZXN0Lml0cy5ybWl0LmVkdS5hdTCCASIwDQYJKoZIhvcN
+            AQEBBQADggEPADCCAQoCggEBAITGn0Kq2hZZFDwvORo+5Gfho7DSdNAG8Zew6Z+r
+            5aubxNjn7Xeh9K6JbA9tRZeDwgE/WbxRy7SCSqDdr4WwMb7NxUZw3BnMiyZW5Wv6
+            yMciblvkvqi1xVtLyU785T7fOlEINbrea2JUXYRxL8zqoOkF9e0LSeT4lf8H9FUl
+            SmV9+A1oCEXWnvXipTapgFiSyB+J2Vy/7AJv9u6oNLdvKEJVg2YIWpuDDjYjc2oj
+            jRrL836lH7POyIeijK9cmTe306MgQdk9vfMty6W0JPVOqDmTXsxLCzECHn7ips26
+            UJl7cLNedU+UhWMuRODiwXBzPIY7/NGmC26tlBqVpx6upk0CAwEAAaOBjjCBizBq
+            BgNVHREEYzBhgiNzc28tc2hpYmJvbGV0aC10ZXN0Lml0cy5ybWl0LmVkdS5hdYY6
+            aHR0cHM6Ly9zc28tc2hpYmJvbGV0aC10ZXN0Lml0cy5ybWl0LmVkdS5hdS9pZHAv
+            c2hpYmJvbGV0aDAdBgNVHQ4EFgQUxEskO9RpCh+WzyoXcovi6Kb7HoIwDQYJKoZI
+            hvcNAQEFBQADggEBAEzfz2vfAI+kcUNCzZp0gK3xWeJ/ES2o3MPNTIXV1K4QZxEw
+            9EgsvSsfPU6LUKNIDeNlhyyI/KtNesAJbG8+5Z8VV3Q3tLl8C9bkxyA9YF/PqeLF
+            t1NjGanRrTDndtl93I4fMzOJqY0HEnIgjwyEkuWRu2OaGY4A/QFGpP4oKyDtXjGo
+            A3B5M0YWwx+2gnbN8luC2Q0gUeRbJ68XNEdxG2RW2H69PxovrkaWJ9rn1jDxhicz
+            alsKeH/DTRYtXz4mc1r3t53Oqlp9WOUL304/NTz+GJmSHbC/OUz2mcpS5LriXKC1
+            uPfJUyAGw99f04iA/IyPe0UAzkxAYb4cVBZQzVw=
+          </ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </KeyDescriptor>
+    <ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:1.0:bindings:SOAP-binding" Location="https://sso-shibboleth-test.its.rmit.edu.au:8443/idp/profile/SAML1/SOAP/ArtifactResolution" index="1"/>
+    <ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://sso-shibboleth-test.its.rmit.edu.au:8443/idp/profile/SAML2/SOAP/ArtifactResolution" index="2"/>
+    <NameIDFormat>urn:mace:shibboleth:1.0:nameIdentifier</NameIDFormat>
+    <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
+    <SingleSignOnService Binding="urn:mace:shibboleth:1.0:profiles:AuthnRequest" Location="https://sso-shibboleth-test.its.rmit.edu.au/idp/profile/Shibboleth/SSO"/>
+    <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://sso-shibboleth-test.its.rmit.edu.au/idp/profile/SAML2/POST/SSO"/>
+    <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST-SimpleSign" Location="https://sso-shibboleth-test.its.rmit.edu.au/idp/profile/SAML2/POST-SimpleSign/SSO"/>
+    <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://sso-shibboleth-test.its.rmit.edu.au/idp/profile/SAML2/Redirect/SSO"/>
+  </IDPSSODescriptor>
+  <AttributeAuthorityDescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:1.1:protocol urn:oasis:names:tc:SAML:2.0:protocol">
+    <Extensions>
+      <shibmd:Scope regexp="false">rmit.edu.au</shibmd:Scope>
+    </Extensions>
+    <KeyDescriptor>
+      <ds:KeyInfo>
+        <ds:X509Data>
+          <ds:X509Certificate>
+            MIIDeTCCAmGgAwIBAgIUNoa8fSgtXacpLdBT8rycpFXvfLMwDQYJKoZIhvcNAQEF
+            BQAwLjEsMCoGA1UEAxMjc3NvLXNoaWJib2xldGgtdGVzdC5pdHMucm1pdC5lZHUu
+            YXUwHhcNMTExMDE4MjM0MDM4WhcNMzExMDE4MjM0MDM4WjAuMSwwKgYDVQQDEyNz
+            c28tc2hpYmJvbGV0aC10ZXN0Lml0cy5ybWl0LmVkdS5hdTCCASIwDQYJKoZIhvcN
+            AQEBBQADggEPADCCAQoCggEBAITGn0Kq2hZZFDwvORo+5Gfho7DSdNAG8Zew6Z+r
+            5aubxNjn7Xeh9K6JbA9tRZeDwgE/WbxRy7SCSqDdr4WwMb7NxUZw3BnMiyZW5Wv6
+            yMciblvkvqi1xVtLyU785T7fOlEINbrea2JUXYRxL8zqoOkF9e0LSeT4lf8H9FUl
+            SmV9+A1oCEXWnvXipTapgFiSyB+J2Vy/7AJv9u6oNLdvKEJVg2YIWpuDDjYjc2oj
+            jRrL836lH7POyIeijK9cmTe306MgQdk9vfMty6W0JPVOqDmTXsxLCzECHn7ips26
+            UJl7cLNedU+UhWMuRODiwXBzPIY7/NGmC26tlBqVpx6upk0CAwEAAaOBjjCBizBq
+            BgNVHREEYzBhgiNzc28tc2hpYmJvbGV0aC10ZXN0Lml0cy5ybWl0LmVkdS5hdYY6
+            aHR0cHM6Ly9zc28tc2hpYmJvbGV0aC10ZXN0Lml0cy5ybWl0LmVkdS5hdS9pZHAv
+            c2hpYmJvbGV0aDAdBgNVHQ4EFgQUxEskO9RpCh+WzyoXcovi6Kb7HoIwDQYJKoZI
+            hvcNAQEFBQADggEBAEzfz2vfAI+kcUNCzZp0gK3xWeJ/ES2o3MPNTIXV1K4QZxEw
+            9EgsvSsfPU6LUKNIDeNlhyyI/KtNesAJbG8+5Z8VV3Q3tLl8C9bkxyA9YF/PqeLF
+            t1NjGanRrTDndtl93I4fMzOJqY0HEnIgjwyEkuWRu2OaGY4A/QFGpP4oKyDtXjGo
+            A3B5M0YWwx+2gnbN8luC2Q0gUeRbJ68XNEdxG2RW2H69PxovrkaWJ9rn1jDxhicz
+            alsKeH/DTRYtXz4mc1r3t53Oqlp9WOUL304/NTz+GJmSHbC/OUz2mcpS5LriXKC1
+            uPfJUyAGw99f04iA/IyPe0UAzkxAYb4cVBZQzVw=
+          </ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </KeyDescriptor>
+    <AttributeService Binding="urn:oasis:names:tc:SAML:1.0:bindings:SOAP-binding" Location="https://sso-shibboleth-test.its.rmit.edu.au:8443/idp/profile/SAML1/SOAP/AttributeQuery"/>
+    <AttributeService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://sso-shibboleth-test.its.rmit.edu.au:8443/idp/profile/SAML2/SOAP/AttributeQuery"/>
+    <NameIDFormat>urn:mace:shibboleth:1.0:nameIdentifier</NameIDFormat>
+    <NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
+  </AttributeAuthorityDescriptor>
+</EntityDescriptor>

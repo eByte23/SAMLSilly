@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D2136BFD-D2DA-4105-920B-8E05C090C597}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SAMLSilly.AspNetCore</RootNamespace>
+    <AssemblyName>SAMLSilly.AspNetCore</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Configuration.cs" />
+    <Compile Include="Config\ActionCollection.cs" />
+    <Compile Include="Config\ActionElement.cs" />
+    <Compile Include="Config\AllowedAudienceUriCollection.cs" />
+    <Compile Include="Config\AssertionProfileElement.cs" />
+    <Compile Include="Config\AttributeElement.cs" />
+    <Compile Include="Config\AudienceUriElement.cs" />
+    <Compile Include="Config\AuthenticationContextCollection.cs" />
+    <Compile Include="Config\AuthenticationContextElement.cs" />
+    <Compile Include="Config\CertificateElement.cs" />
+    <Compile Include="Config\CertificateValidationCollection.cs" />
+    <Compile Include="Config\CertificateValidationElement.cs" />
+    <Compile Include="Config\CommonDomainCookieElement.cs" />
+    <Compile Include="Config\ContactCollection.cs" />
+    <Compile Include="Config\ContactElement.cs" />
+    <Compile Include="Config\EnumerableConfigurationElementCollection.cs" />
+    <Compile Include="Config\HttpAuthCredentialsElement.cs" />
+    <Compile Include="Config\HttpAuthElement.cs" />
+    <Compile Include="Config\IConfigurationElementCollectionElement.cs" />
+    <Compile Include="Config\IdentityProviderCollection.cs" />
+    <Compile Include="Config\IdentityProviderElement.cs" />
+    <Compile Include="Config\IdentityProviderEndpointCollection.cs" />
+    <Compile Include="Config\IdentityProviderEndpointElement.cs" />
+    <Compile Include="Config\LoggingElement.cs" />
+    <Compile Include="Config\MetadataElement.cs" />
+    <Compile Include="Config\NameIdFormatCollection.cs" />
+    <Compile Include="Config\NameIdFormatElement.cs" />
+    <Compile Include="Config\OrganizationElement.cs" />
+    <Compile Include="Config\PersistentPseudonymElement.cs" />
+    <Compile Include="Config\RequestedAttributesCollection.cs" />
+    <Compile Include="Config\Saml2Section.cs" />
+    <Compile Include="Config\ServiceProviderElement.cs" />
+    <Compile Include="Config\ServiceProviderEndpointCollection.cs" />
+    <Compile Include="Config\ServiceProviderEndpointElement.cs" />
+    <Compile Include="Config\WritableConfigurationElement.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Protocol\AbstractEndpointHandler.cs" />
+    <Compile Include="Protocol\Pages\BasePage.cs">
+      <SubType>aspxcodebehind</SubType>
+    </Compile>
+    <Compile Include="Protocol\Pages\ErrorPage.cs">
+      <SubType>aspxcodebehind</SubType>
+    </Compile>
+    <Compile Include="Protocol\Pages\SelectIDP.cs">
+      <SubType>aspxcodebehind</SubType>
+    </Compile>
+    <Compile Include="Protocol\Saml20AbstractEndpointHandler.cs" />
+    <Compile Include="Protocol\Saml20CDCIdPReturnPoint.cs" />
+    <Compile Include="Protocol\Saml20CDCReader.cs" />
+    <Compile Include="Protocol\Saml20LogoutHandler.cs" />
+    <Compile Include="Protocol\Saml20MetadataHandler.cs" />
+    <Compile Include="Protocol\Saml20SignonHandler.cs" />
+    <Compile Include="Saml20MetadataFetcherModule.cs" />
+    <Compile Include="WebConfigConfigurationProvider.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SAMLSilly.Core\SAMLSilly.Core.csproj">
+      <Project>{75e5bad2-a20c-43cc-b5c8-38004cedbdfd}</Project>
+      <Name>SAMLSilly.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

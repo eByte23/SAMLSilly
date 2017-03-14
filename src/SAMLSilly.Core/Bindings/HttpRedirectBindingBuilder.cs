@@ -7,7 +7,7 @@ using SAMLSilly.Bindings;
 using SAMLSilly.Utils;
 using SAMLSilly.Config;
 
-namespace SAML2.AspNetCore.BindingBuilders
+namespace SAMLSilly.AspNetCore.BindingBuilders
 {
     /// <summary>
     /// Handles the creation of redirect locations when using the HTTP redirect binding, which is outlined in [SAMLBind]

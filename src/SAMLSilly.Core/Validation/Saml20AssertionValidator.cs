@@ -17,7 +17,7 @@ namespace SAMLSilly.Validation
         /// </summary>
         private readonly bool _quirksMode;
 
-        private readonly ILogger _logger;
+        //private readonly ILogger _logger;
 
         /// <summary>
         /// The allowed audience URIs.
@@ -44,12 +44,13 @@ namespace SAMLSilly.Validation
         /// </summary>
         /// <param name="allowedAudienceUris">The allowed audience uris.</param>
         /// <param name="quirksMode">if set to <c>true</c> [quirks mode].</param>
-        public Saml20AssertionValidator(List<Uri> allowedAudienceUris, bool quirksMode)
+        //TODO: @ebyte23 logging fix
+        public Saml20AssertionValidator(List<Uri> allowedAudienceUris, bool quirksMode)//, string loggerFactoryType)
         {
             _allowedAudienceUris = allowedAudienceUris;
             _quirksMode = quirksMode;
-            var loggerFactory = Activator.CreateInstance<ILoggerFactory>();
-            _logger = loggerFactory.CreateLogger<Saml20AssertionValidator>();
+            //var loggerFactory = (ILoggerFactory)Activator.CreateInstance(Type.GetType(loggerFactoryType));
+            //_logger = loggerFactory.CreateLogger<Saml20AssertionValidator>();
         }
 
         #region ISaml20AssertionValidator interface
@@ -244,7 +245,7 @@ namespace SAMLSilly.Validation
 
             var oneTimeUseSeen = false;
             var proxyRestrictionsSeen = false;
-            
+
             ValidateConditionsInterval(assertion.Conditions);
 
             foreach (var cat in assertion.Conditions.Items)
@@ -328,12 +329,12 @@ namespace SAMLSilly.Validation
                         }
                     }
 
-                    if (_logger.IsEnabled(LogLevel.Debug))
-                    {
-                        var intended = string.Join(", ", audienceRestriction.Audience.ToArray());
-                        var allowed = string.Join(", ", _allowedAudienceUris.Select(u => u.ToString()).ToArray());
-                        _logger.LogDebug(TraceMessages.AudienceRestrictionValidated, intended, allowed);
-                    }
+                    // if (_logger.IsEnabled(LogLevel.Debug))
+                    // {
+                    //     var intended = string.Join(", ", audienceRestriction.Audience.ToArray());
+                    //     var allowed = string.Join(", ", _allowedAudienceUris.Select(u => u.ToString()).ToArray());
+                    //     _logger.LogDebug(TraceMessages.AudienceRestrictionValidated, intended, allowed);
+                    // }
 
                     if (match == null)
                     {
@@ -342,7 +343,7 @@ namespace SAMLSilly.Validation
                 }
             }
         }
-        
+
         /// <summary>
         /// Validates the details of the Statements present in the assertion ([SAML2.0 standard] section 2.7)
         /// NOTE: the rules relating to the enforcement of a Subject element are handled during Subject validation

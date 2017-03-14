@@ -6,11 +6,11 @@
     <AssemblyName>SAMLSilly</AssemblyName>
     <PackageId>SAMLSilly</PackageId>
     <Description>SAML2.0 library based on the SAML2 package, with better compatibility for ADFS and other saml providers</Description>
-    <VersionPrefix>0.0.1-alpha1</VersionPrefix>
+    <VersionPrefix>0.0.1</VersionPrefix>
     <Authors>Elijah Bate</Authors>
     <PackageTags></PackageTags>
     <PackageProjectUrl>https://github.com/ebyte23/SAMLSilly</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/eByte23/SAMLSilly/blob/master/LICENSE</PackageLicenseUrl>    
+    <PackageLicenseUrl>https://github.com/eByte23/SAMLSilly/blob/master/LICENSE</PackageLicenseUrl>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>

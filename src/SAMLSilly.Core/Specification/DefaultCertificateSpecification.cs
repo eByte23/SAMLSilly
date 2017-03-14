@@ -11,6 +11,13 @@ namespace SAMLSilly.Specification
     /// </summary>
     public class DefaultCertificateSpecification : ICertificateSpecification
     {
+       // private readonly ILogger _logger;
+
+        public DefaultCertificateSpecification()//ILoggerFactory loggerFactory)
+        {
+            //_logger = loggerFactory.CreateLogger<SpecificationFactory>();
+        }
+
         /// <summary>
         /// Determines whether the specified certificate is considered valid according to the RFC3280 specification.
         /// </summary>
@@ -31,8 +38,7 @@ namespace SAMLSilly.Specification
             }
             catch (Exception e)
             {
-                var loggerFactory = Activator.CreateInstance<ILoggerFactory>();
-                loggerFactory.CreateLogger<SpecificationFactory>().LogWarning(string.Format(ErrorMessages.CertificateIsNotRFC3280Valid, certificate.SubjectName.Name, certificate.Thumbprint), e);
+                //_logger.LogWarning(string.Format(ErrorMessages.CertificateIsNotRFC3280Valid, certificate.SubjectName.Name, certificate.Thumbprint), e);
             }
 
             return false;

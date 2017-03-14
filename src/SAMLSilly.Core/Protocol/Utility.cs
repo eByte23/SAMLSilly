@@ -43,7 +43,7 @@ namespace SAMLSilly.Protocol
         /// <param name="keys">The keys.</param>
         /// <param name="identityProvider">The identity provider.</param>
         /// <returns>List of trusted certificate signers.</returns>
-        public static IEnumerable<AsymmetricAlgorithm> GetTrustedSigners(ICollection<KeyDescriptor> keys, IdentityProvider identityProvider)
+        public IEnumerable<AsymmetricAlgorithm> GetTrustedSigners(ICollection<KeyDescriptor> keys, IdentityProvider identityProvider)
         {
             if (keys == null)
             {
@@ -183,14 +183,15 @@ namespace SAMLSilly.Protocol
             samlResponse = encoding.GetString(Convert.FromBase64String(samlResponse));
             doc.LoadXml(samlResponse);
 
-            //TODO: Make the validate whole doc sig as well as assertion
+
+            //TODO: @ebyte23 FIX! Make the validate whole doc sig as well as assertion
             foreach (XmlNode n in doc.ChildNodes)
             {
-                if (n.Name == "Response" || n.Name == "saml2p:Response")
+                if (n.LocalName == "Response" || n.LocalName.ToUpperInvariant() == "RESPONSE")
                 {
                     foreach (XmlNode x in n.ChildNodes)
                     {
-                        if (x.Name == "Signature" || x.Name == "ds:Signature")
+                        if (x.LocalName == "Signature" || n.LocalName.ToUpperInvariant() == "Signature")
                         {
                             _logger.LogWarning("Two Signatures found in response, removing extra signature", samlResponse);
                             n.RemoveChild(x);

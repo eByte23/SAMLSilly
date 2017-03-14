@@ -15,9 +15,9 @@ using SAMLSilly.Validation;
 namespace SAMLSilly
 {
     /// <summary>
-    /// Encapsulates the functionality required of a DK-SAML 2.0 Assertion. 
+    /// Encapsulates the functionality required of a DK-SAML 2.0 Assertion.
     /// </summary>
-    public class Saml20Assertion 
+    public class Saml20Assertion
     {
         /// <summary>
         /// Configuration element
@@ -41,7 +41,7 @@ namespace SAMLSilly
 
         /// <summary>
         /// A strongly-typed version of the assertion. It is generated on-demand from the contents of the <code>_samlAssertion</code>
-        /// field. 
+        /// field.
         /// </summary>
         private Assertion _assertion;
 
@@ -149,7 +149,7 @@ namespace SAMLSilly
             {
                 if (_assertionAttributes == null)
                 {
-                    ExtractAttributes(); // Lazy initialization of the attributes list.                
+                    ExtractAttributes(); // Lazy initialization of the attributes list.
                 }
 
                 return _assertionAttributes;
@@ -157,7 +157,7 @@ namespace SAMLSilly
 
             set
             {
-                // _assertionAttributes == null is reserved for signalling that the attribute is not initialized, so 
+                // _assertionAttributes == null is reserved for signalling that the attribute is not initialized, so
                 // convert it to an empty list.
                 if (value == null)
                 {
@@ -198,7 +198,7 @@ namespace SAMLSilly
 
             set
             {
-                // _encryptedAssertionAttributes == null is reserved for signalling that the attribute is not initialized, so 
+                // _encryptedAssertionAttributes == null is reserved for signalling that the attribute is not initialized, so
                 // convert it to an empty list.
                 if (value == null)
                 {
@@ -214,7 +214,7 @@ namespace SAMLSilly
         /// </summary>
         /// <value>The encrypted id.</value>
         public string EncryptedId { get; set; }
-        
+
         /// <summary>
         /// Gets the ID attribute of the &lt;Assertion&gt; element.
         /// </summary>
@@ -222,7 +222,7 @@ namespace SAMLSilly
         {
             get { return Assertion.Id; }
         }
-        
+
         /// <summary>
         /// Gets a value indicating whether the expiration time has been exceeded.
         /// </summary>
@@ -329,22 +329,22 @@ namespace SAMLSilly
                 {
                     if (string.IsNullOrEmpty(_profile))
                     {
-                        _assertionValidator = new Saml20AssertionValidator(null, _quirksMode);
+                        _assertionValidator = new Saml20AssertionValidator(null, _quirksMode);//, config.LoggingFactoryType);
                     }
                     else
                     {
-                        _assertionValidator = (ISaml20AssertionValidator)Activator.CreateInstance(Type.GetType(_profile), null, _quirksMode);
+                        _assertionValidator = (ISaml20AssertionValidator)Activator.CreateInstance(Type.GetType(_profile), null, _quirksMode);//, config.LoggingFactoryType);
                     }
                 }
                 else
                 {
                     if (string.IsNullOrEmpty(_profile))
                     {
-                        _assertionValidator = new Saml20AssertionValidator(config.AllowedAudienceUris, _quirksMode);
+                        _assertionValidator = new Saml20AssertionValidator(config.AllowedAudienceUris, _quirksMode);//, config.LoggingFactoryType);
                     }
                     else
                     {
-                        _assertionValidator = (ISaml20AssertionValidator)Activator.CreateInstance(Type.GetType(_profile), config.AllowedAudienceUris, _quirksMode);
+                        _assertionValidator = (ISaml20AssertionValidator)Activator.CreateInstance(Type.GetType(_profile), config.AllowedAudienceUris, _quirksMode);//, config.LoggingFactoryType);
                     }
                 }
             }
@@ -353,7 +353,7 @@ namespace SAMLSilly
         }
 
         /// <summary>
-        /// Check the signature of the XmlDocument using the list of keys. 
+        /// Check the signature of the XmlDocument using the list of keys.
         /// If the signature key is found, the SigningKey property is set.
         /// </summary>
         /// <param name="keys">A list of KeyDescriptor elements. Probably extracted from the metadata describing the IDP that sent the message.</param>
@@ -385,7 +385,7 @@ namespace SAMLSilly
                 throw new Saml20Exception("Assertion is no longer valid.");
             }
         }
-       
+
         /// <summary>
         /// Returns the KeyInfo element of the signature of the token.
         /// </summary>
@@ -419,7 +419,7 @@ namespace SAMLSilly
         /// <param name="cert">The certificate to sign the assertion with.</param>
         public void Sign(X509Certificate2 cert, Saml2Configuration config)
         {
-            CheckCertificateCanSign(cert);            
+            CheckCertificateCanSign(cert);
 
             // Clear the strongly typed version of the assertion in preparation for a new source.
             _assertion = null;
@@ -465,11 +465,11 @@ namespace SAMLSilly
 
             // Retrieve the value of the "ID" attribute on the root assertion element.
             var list = assertionDocument.GetElementsByTagName(Assertion.ElementName, Saml20Constants.Assertion);
-            var el = (XmlElement)list[0];            
+            var el = (XmlElement)list[0];
             var reference = new Reference("#" + el.GetAttribute("ID"));
 
-            reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());            
-            reference.AddTransform(new XmlDsigExcC14NTransform());            
+            reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
+            reference.AddTransform(new XmlDsigExcC14NTransform());
 
             signedXml.AddReference(reference);
 
@@ -479,7 +479,7 @@ namespace SAMLSilly
             signedXml.ComputeSignature();
 
             // Append the computed signature. The signature must be placed as the sibling of the Issuer element.
-            var nodes = assertionDocument.DocumentElement.GetElementsByTagName("Issuer", Saml20Constants.Assertion);            
+            var nodes = assertionDocument.DocumentElement.GetElementsByTagName("Issuer", Saml20Constants.Assertion);
             if (nodes.Count != 1)
             {
                 throw new Saml20Exception("Assertion MUST contain one <Issuer> element.");
@@ -522,11 +522,11 @@ namespace SAMLSilly
         }
 
         /// <summary>
-        /// Extracts the list of attributes from the &lt;AttributeStatement&gt; of the assertion, and 
+        /// Extracts the list of attributes from the &lt;AttributeStatement&gt; of the assertion, and
         /// stores it in <code>_assertionAttributes</code>.
         /// </summary>
         private void ExtractAttributes()
-        {            
+        {
             _assertionAttributes = new List<SamlAttribute>(0);
             _encryptedAssertionAttributes = new List<EncryptedElement>(0);
 
@@ -539,14 +539,14 @@ namespace SAMLSilly
             // NOTE It would be nice to implement a better-performing solution where only the AttributeStatement is converted.
             // NOTE Namespace issues in the xml-schema "type"-attribute prevents this, though.
             var assertion = Serialization.Deserialize<Assertion>(new XmlNodeReader(XmlAssertion));
-                        
+
             var attributeStatements = assertion.GetAttributeStatements();
             if (attributeStatements.Count == 0 || attributeStatements[0].Items == null)
             {
                 return;
             }
 
-            var attributeStatement = attributeStatements[0];            
+            var attributeStatement = attributeStatements[0];
             foreach (var item in attributeStatement.Items)
             {
                 if (item is SamlAttribute)
@@ -570,7 +570,7 @@ namespace SAMLSilly
             {
                 return;
             }
-            
+
             // Generate the new AttributeStatement
             var attributeStatement = new AttributeStatement();
             var statements = new List<object>(_encryptedAssertionAttributes.Count + _assertionAttributes.Count);
@@ -597,7 +597,7 @@ namespace SAMLSilly
                 var attr = XmlAssertion.OwnerDocument.ImportNode(attributeStatementDoc.DocumentElement, true);
 
                 // Insert the new statement.
-                XmlAssertion.AppendChild(attr);                
+                XmlAssertion.AppendChild(attr);
             }
 
             _encryptedAssertionAttributes = null;
@@ -620,7 +620,7 @@ namespace SAMLSilly
                 }
             }
 
-            // Validate the saml20Assertion.      
+            // Validate the saml20Assertion.
             if (_autoValidate)
             {
                 GetAssertionValidator(config).ValidateAssertion(Assertion, config.AllowAnyAuthContextDeclRef);

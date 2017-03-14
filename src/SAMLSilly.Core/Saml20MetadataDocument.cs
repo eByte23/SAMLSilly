@@ -151,9 +151,7 @@ namespace SAMLSilly
             catch (Exception e)
             {
                 // Probably not a metadata file.
-                var loggerFactory = Activator.CreateInstance<ILoggerFactory>();
-                loggerFactory.CreateLogger<Saml20MetadataDocument>().LogError("Problem parsing metadata file", e);
-                throw;
+                throw new InvalidDataException("Problem parsing metadata file", e);
             }
         }
 
@@ -169,9 +167,7 @@ namespace SAMLSilly
             catch (Exception e)
             {
                 // Probably not a metadata file.
-                var loggerFactory = Activator.CreateInstance<ILoggerFactory>();
-                loggerFactory.CreateLogger<Saml20MetadataDocument>().LogError("Problem parsing metadata file", e);
-                throw;
+                throw new InvalidDataException("Problem parsing metadata file", e);
             }
         }
 

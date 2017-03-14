@@ -10,6 +10,12 @@ namespace SAMLSilly.Specification
     /// </summary>
     public class SelfIssuedCertificateSpecification : ICertificateSpecification
     {
+        //private readonly ILogger _logger;
+
+        public SelfIssuedCertificateSpecification()//ILoggerFactory loggerFactory)
+        {
+            //_logger = loggerFactory.CreateLogger<SpecificationFactory>();
+        }
         /// <summary>
         /// Determines whether the specified certificate is considered valid by this specification.
         /// Always returns true. No online validation attempted.
@@ -34,8 +40,7 @@ namespace SAMLSilly.Specification
             }
             catch (Exception e)
             {
-                var loggerFactory = Activator.CreateInstance<ILoggerFactory>();
-                loggerFactory.CreateLogger<SpecificationFactory>().LogWarning(string.Format(ErrorMessages.CertificateIsNotRFC3280Valid, certificate.SubjectName.Name, certificate.Thumbprint), e);
+               // _logger.LogWarning(string.Format(ErrorMessages.CertificateIsNotRFC3280Valid, certificate.SubjectName.Name, certificate.Thumbprint), e);
             }
 
             return false;

@@ -29,8 +29,7 @@ namespace SAMLSilly.Specification
                     }
                     catch (Exception e)
                     {
-                        var loggerFactory = Activator.CreateInstance<ILoggerFactory>();
-                        loggerFactory.CreateLogger<SpecificationFactory>().LogError(e.Message, e);
+                       //we should log here
                     }
                 }
             }
@@ -38,7 +37,7 @@ namespace SAMLSilly.Specification
             if (specs.Count == 0)
             {
                 // Add default specification
-                specs.Add(new DefaultCertificateSpecification());
+                specs.Add((ICertificateSpecification)Activator.CreateInstance(typeof(DefaultCertificateSpecification)));
             }
 
             return specs;

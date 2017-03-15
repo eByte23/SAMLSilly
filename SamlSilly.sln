@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAMLSilly", "src\SAMLSilly.Core\SAMLSilly.csproj", "{75E5BAD2-A20C-43CC-B5C8-38004CEDBDFD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAMLSilly", "src\SAMLSilly\SAMLSilly.csproj", "{75E5BAD2-A20C-43CC-B5C8-38004CEDBDFD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{512BE8D6-8F5D-4769-B2F9-02299C8B7C95}"
 EndProject

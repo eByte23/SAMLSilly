@@ -1,16 +1,31 @@
-version: 0.1.0-alpha{build}
 image: Visual Studio 2017
+version: 0.1.0-alpha{build}
+nuget:
+  account_feed: true
+  project_feed: true
+environment:
+  ver_num: 0.1.0
+  ver_suffix: -alpha
 build_script:
 - cmd: >-
-    dotnet restore -v Warning
-    dotnet pack .\src\SAMLSilly -o .\artifacts\SapientGuardian.EntityFrameworkCore.MySql -c Release
-artifacts:
+    build_server.bat
+test_script:
+- cmd: dotnet test .\tests\SAMLSilly.Tests\SAMLSilly.Tests.csproj
+after_test:
+- cmd: dotnet pack .\src\SAMLSilly\SAMLSilly.csproj -c Release -o ..\..\artifacts\ /property:version=%APPVEYOR_BUILD_VERSION%
 - path: 'artifacts\**\*.nupkg'
+  name: SAMLSilly
 deploy:
-  provider: NuGet
+- provider: NuGet
   api_key:
-    secure: 7nX5a7V6wWbtPSJ6bQSU9BRZwJEdn70w0Ydlf5fuk44Gjk9BVgxnYK6u8MNzT2yA
-  artifact: /.*\.nupkg/
+    secure: U9zqZ3JPcAM/4jiTw2hwZms8xY0naWWHbAIJRIvHYexzsMZS/LeZxJZdVMxslygj
+  artifact: 'artifacts\**\*.nupkg'
   on:
     branch: master
-    appveyor_repo_tag: true
+- provider: NuGet
+  server: https://www.myget.org/F/ebyte23/api/v2/package
+  api_key:
+    secure: YtC3mG0Rq+bi8DUTzJ89j0REA5Apj8bYTgJXroTEoRmXHLW4jts/S693V35lp3Dn
+  artifact: 'artifacts\**\*.nupkg'
+  on:
+    branch: dev

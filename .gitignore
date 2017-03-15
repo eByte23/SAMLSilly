@@ -196,3 +196,5 @@ Metadata-Test/
 *.vs
 
 nuget_push.bat
+!sts_dev_certificate.pfx
+!SafewhereTest_SFS.pfx

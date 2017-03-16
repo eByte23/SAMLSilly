@@ -34,7 +34,7 @@ namespace SAMLSilly.AspNet
 
         private string GetFetcherType()
         {
-            return System.Configuration.ConfigurationManager.AppSettings["saml2:configurationReaderType"] ?? "SAML2.AspNet.WebConfigConfigurationReader";
+            return System.Configuration.ConfigurationManager.AppSettings["saml2:configurationReaderType"] ?? "SAMLSilly.AspNetCore.WebConfigConfigurationReader";
         }
 
         private static readonly ConfigurationFactory instance = new ConfigurationFactory();

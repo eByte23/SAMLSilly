@@ -3,8 +3,8 @@
     <OutputType>Library</OutputType>
     <TargetFramework>net461</TargetFramework>
     <DebugType>portable</DebugType>
-    <AssemblyName>SAMLSilly.Core</AssemblyName>
-    <PackageId>SAMLSilly.Core</PackageId>
+    <AssemblyName>SAMLSilly.AspNetCore</AssemblyName>
+    <PackageId>SAMLSilly.AspNetCore</PackageId>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -15,9 +15,6 @@
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SAMLSilly.Core\SAMLSilly.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.ServiceModel" />
+    <ProjectReference Include="..\SAMLSilly\SAMLSilly.csproj" />
   </ItemGroup>
 </Project>

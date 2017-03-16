@@ -1,7 +1,7 @@
 ﻿using System.Security.Principal;
 using System.Web;
 
-namespace SAML2.Identity
+namespace SAMLSilly.Identity
 {
     /// <summary>
     /// The Principal cache for SAML2.
@@ -14,7 +14,7 @@ namespace SAML2.Identity
         /// <param name="principal">The principal.</param>
         internal static void AddPrincipal(IPrincipal principal)
         {
-            if (HttpContext.Current.Session != null) 
+            if (HttpContext.Current.Session != null)
             {
                 HttpContext.Current.Session[typeof(Saml20Identity).FullName] = principal;
             }
@@ -26,7 +26,7 @@ namespace SAML2.Identity
         /// </summary>
         internal static void Clear()
         {
-            if (HttpContext.Current.Session != null) 
+            if (HttpContext.Current.Session != null)
             {
                 HttpContext.Current.Session.Remove(typeof(Saml20Identity).FullName);
             }

@@ -8,12 +8,13 @@ namespace SAMLSilly.Config
     public class ServiceProviderEndpoint
     {
         public ServiceProviderEndpoint() { }
-        public ServiceProviderEndpoint(EndpointType type, string localPath, string redirectUrl = null, BindingType bindingType = BindingType.NotSet) : this()
+        public ServiceProviderEndpoint(EndpointType type, string localPath, string redirectUrl = null, BindingType bindingType = BindingType.NotSet, bool isDefault = true) : this()
         {
             Type = type;
             LocalPath = localPath;
             RedirectUrl = redirectUrl;
             Binding = bindingType;
+            Default = isDefault;
         }
 
         /// <summary>
@@ -45,6 +46,12 @@ namespace SAMLSilly.Config
         /// </summary>
         /// <value>The type.</value>
         public EndpointType Type { get; set; }
+
+        /// <summary>
+        /// Gets or sets if current endpoint is the default.
+        /// </summary>
+        /// <value>The Default.</value>
+        public bool Default { get; set; }
 
     }
 }

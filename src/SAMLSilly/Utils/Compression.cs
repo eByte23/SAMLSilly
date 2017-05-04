@@ -13,16 +13,15 @@ namespace SAMLSilly.Utils
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The decompressed value.</returns>
-        public static string DeflateDecompress(string value)
+        public static string Inflate(string value)
         {
             var encoded = Convert.FromBase64String(value);
-            var memoryStream = new MemoryStream(encoded);
 
             var result = new StringBuilder();
-            using (var stream = new DeflateStream(memoryStream, CompressionMode.Decompress)) {
-                var testStream = new StreamReader(new BufferedStream(stream), Encoding.UTF8);
-
-                // It seems we need to "peek" on the StreamReader to get it started. If we don't do this, the first call to 
+            using (var stream = new DeflateStream(new MemoryStream(encoded), CompressionMode.Decompress))
+            using (var testStream = new StreamReader(new BufferedStream(stream), Encoding.UTF8))
+            {
+                // It seems we need to "peek" on the StreamReader to get it started. If we don't do this, the first call to
                 // ReadToEnd() will return string.empty.
                 testStream.Peek();
                 result.Append(testStream.ReadToEnd());
@@ -38,10 +37,11 @@ namespace SAMLSilly.Utils
         /// </summary>
         /// <param name="val">The val.</param>
         /// <returns>The compressed string.</returns>
-        public static string DeflateEncode(string val)
+        public static string Deflate(string val)
         {
-            var memoryStream = new MemoryStream();
-            using (var writer = new StreamWriter(new DeflateStream(memoryStream, CompressionMode.Compress, true), new UTF8Encoding(false))) {
+            using (var memoryStream = new MemoryStream())
+            using (var writer = new StreamWriter(new DeflateStream(memoryStream, CompressionMode.Compress, true), new UTF8Encoding(false)))
+            {
                 writer.Write(val);
                 writer.Close();
 

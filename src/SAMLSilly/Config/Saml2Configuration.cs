@@ -11,7 +11,7 @@ namespace SAMLSilly.Config
         /// <summary>
         /// Gets the section name.
         /// </summary>
-        public static string Name { get { return "saml2"; } }
+        public static string Name => "saml2";
 
         /// <summary>
         /// Gets or sets the allowed audience uris.

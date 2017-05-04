@@ -152,7 +152,7 @@ namespace SAMLSilly.AspNetCore.BindingBuilders
             result.Append("&RelayState=");
 
             // Encode the relay state if we're building a request. Otherwise, append unmodified.
-            result.Append(_request != null ? Uri.EscapeDataString(Compression.DeflateEncode(RelayState)) : RelayState);
+            result.Append(_request != null ? Uri.EscapeDataString(Compression.Deflate(RelayState)) : RelayState);
         }
 
         /// <summary>
@@ -254,7 +254,7 @@ namespace SAMLSilly.AspNetCore.BindingBuilders
                 value = _response;
             }
 
-            var encoded = Compression.DeflateEncode(value);
+            var encoded = Compression.Deflate(value);
             result.Append(UpperCaseUrlEncode(Uri.EscapeDataString(encoded)));
         }
     }

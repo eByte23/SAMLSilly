@@ -68,14 +68,14 @@ namespace SAMLSilly.Bindings
         }
 
         /// <summary>
-        /// Gets the message that was contained in the query. Use the <code>IsResponse</code> or the <code>IsRequest</code> property 
+        /// Gets the message that was contained in the query. Use the <code>IsResponse</code> or the <code>IsRequest</code> property
         /// to determine the kind of message.
         /// </summary>
         public string Message { get; private set; }
 
         /// <summary>
-        /// Gets the relay state that was included with the query. The result will still be encoded according to the 
-        /// rules given in section 3.4.4.1 of [SAMLBind], i.e. base64-encoded and DEFLATE-compressed. Use the property 
+        /// Gets the relay state that was included with the query. The result will still be encoded according to the
+        /// rules given in section 3.4.4.1 of [SAMLBind], i.e. base64-encoded and DEFLATE-compressed. Use the property
         /// <code>RelayStateDecoded</code> to get the decoded contents of the RelayState parameter.
         /// </summary>
         public string RelayState { get; private set; }
@@ -85,7 +85,7 @@ namespace SAMLSilly.Bindings
         /// </summary>
         public string RelayStateDecoded
         {
-            get { return _relaystateDecoded ?? (_relaystateDecoded = Utils.Compression.DeflateDecompress(RelayState)); }
+            get { return _relaystateDecoded ?? (_relaystateDecoded = Utils.Compression.Inflate(RelayState)); }
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace SAMLSilly.Bindings
         }
 
         /// <summary>
-        /// Check the signature of a HTTP-Redirect message using the list of keys. 
+        /// Check the signature of a HTTP-Redirect message using the list of keys.
         /// </summary>
         /// <param name="keys">A list of KeyDescriptor elements. Probably extracted from the metadata describing the IDP that sent the message.</param>
         /// <returns>True, if one of the given keys was able to verify the signature. False in all other cases.</returns>
@@ -224,7 +224,7 @@ namespace SAMLSilly.Bindings
         /// </summary>
         private void ReadMessageParameter()
         {
-            Message = Compression.DeflateDecompress(Message);
+            Message = Compression.Inflate(Message);
         }
 
         /// <summary>

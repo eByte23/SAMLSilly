@@ -15,6 +15,7 @@ namespace SAMLSilly.Utils
         {
             if (configuration == null) throw new ArgumentNullException("configuration");
             if (logger == null) throw new ArgumentNullException("logger");
+
             this.configuration = configuration;
             this._logger = logger;
         }
@@ -32,10 +33,10 @@ namespace SAMLSilly.Utils
             var keyClause = new System.Security.Cryptography.Xml.KeyInfoX509Data(configuration.ServiceProvider.SigningCertificate, X509IncludeOption.EndCertOnly);
             keyinfo.AddClause(keyClause);
 
-            var doc = new Saml20MetadataDocument(configuration, keyinfo, sign);
+            var metaDoc = new Saml20MetadataDocument().Load(configuration);
 
             _logger.LogDebug(TraceMessages.MetadataDocumentCreated);
-            return doc.ToXml(encoding, configuration.ServiceProvider.SigningCertificate);
+            return metaDoc.ToXml(encoding, configuration.ServiceProvider.SigningCertificate);
         }
     }
 }

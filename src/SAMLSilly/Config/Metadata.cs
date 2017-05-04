@@ -37,7 +37,7 @@ namespace SAMLSilly.Config
         public Metadata()
         {
             RequestedAttributes = new List<Attribute>();
-            //Organization = new Organization(); // The Organization element appears to break metaadata (missing required lang attribute)
+            Organization = new Organization(); // The Organization element appears to break metaadata (missing required lang attribute)
             Contacts = new List<Contact>();
         }
     }

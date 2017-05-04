@@ -72,15 +72,17 @@ namespace SAMLSilly.Utils
         /// <returns>An XmlDocument containing the serialized form of the item</returns>
         public static XmlDocument Serialize<T>(T item)
         {
-            var stream = new MemoryStream();
-            Serialize(item, stream);
-
             // create the XmlDocument to return
             var doc = new XmlDocument();
-            stream.Seek(0, SeekOrigin.Begin);
-            doc.Load(stream);
+            using (var stream = new MemoryStream())
+            {
+                Serialize(item, stream);
 
-            stream.Close();
+                stream.Seek(0, SeekOrigin.Begin);
+                doc.Load(stream);
+
+                stream.Close();
+            }
 
             return doc;
         }
@@ -93,13 +95,17 @@ namespace SAMLSilly.Utils
         /// <returns>The serialized string.</returns>
         public static string SerializeToXmlString<T>(T item)
         {
-            var stream = new MemoryStream();
-            Serialize(item, stream);
+            string serializedValue;
+            using (var stream = new MemoryStream())
+            using (var reader = new StreamReader(stream))
+            {
+                Serialize(item, stream);
 
-            var reader = new StreamReader(stream);
-            stream.Seek(0, SeekOrigin.Begin);
-            
-            return reader.ReadToEnd();
+                stream.Seek(0, SeekOrigin.Begin);
+                serializedValue = reader.ReadToEnd();
+            }
+
+            return serializedValue;
         }
     }
 }

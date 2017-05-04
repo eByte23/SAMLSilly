@@ -22,14 +22,14 @@ namespace SAMLSilly.Validation
 
             if (encryptedElement.EncryptedData == null)
             {
-                throw new Saml20FormatException(string.Format("An {0} MUST contain an xenc:EncryptedData element", parentNodeName));
+                throw new Saml20FormatException($"An {parentNodeName} MUST contain an xenc:EncryptedData element");
             }
 
             if (encryptedElement.EncryptedData.Type != null
                 && !string.IsNullOrEmpty(encryptedElement.EncryptedData.Type)
-                && encryptedElement.EncryptedData.Type != Saml20Constants.Xenc + "Element")
+                && encryptedElement.EncryptedData.Type != $"{Saml20Constants.Xenc}Element")
             {
-                throw new Saml20FormatException(string.Format("Type attribute of EncryptedData MUST have value {0} if it is present", Saml20Constants.Xenc + "Element"));
+                throw new Saml20FormatException($"Type attribute of EncryptedData MUST have value {Saml20Constants.Xenc}Element if it is present");
             }
         }
     }

@@ -264,33 +264,20 @@ namespace SAMLSilly.Utils
         /// <param name="cert">The certificate used to sign the document</param>
         public static void SignDocument(XmlDocument doc, string id, X509Certificate2 cert, AlgorithmType signatureAlgorithm)
         {
-            var signedXml = SetupSignedDocWithSignatureType(doc, cert, signatureAlgorithm);
-
-            // Retrieve the value of the "ID" attribute on the root assertion element.
-            var reference = new Reference("#" + id);
-
-            reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
-            reference.AddTransform(new XmlDsigExcC14NTransform());
-
-            signedXml.AddReference(reference);
-
-            // Include the public key of the certificate in the assertion.
-            signedXml.KeyInfo = new KeyInfo();
-            signedXml.KeyInfo.AddClause(new KeyInfoX509Data(cert, X509IncludeOption.WholeChain));
-
-            signedXml.ComputeSignature();
-
-            // Append the computed signature. The signature must be placed as the sibling of the Issuer element.
-            if (doc.DocumentElement != null)
+            var signedXml = GenericSign(doc, id, cert, (appDoc, sigElem) =>
             {
-                var nodes = doc.DocumentElement.GetElementsByTagName("Issuer", Saml20Constants.Assertion);
-
-                var parentNode = nodes[0].ParentNode;
-                if (parentNode != null)
+                // Append the computed signature. The signature must be placed as the sibling of the Issuer element.
+                if (appDoc.DocumentElement != null)
                 {
-                    parentNode.InsertAfter(doc.ImportNode(signedXml.GetXml(), true), nodes[0]);
+                    var nodes = appDoc.DocumentElement.GetElementsByTagName("Issuer", Saml20Constants.Assertion);
+
+                    var parentNode = nodes[0].ParentNode;
+                    if (parentNode != null)
+                    {
+                        parentNode.InsertAfter(appDoc.ImportNode(sigElem, true), nodes[0]);
+                    }
                 }
-            }
+            },signatureAlgorithm);
         }
 
         private static SignedXml SetupSignedDocWithSignatureType(XmlDocument doc, X509Certificate2 cert, AlgorithmType signatureAlgorithm)
@@ -301,9 +288,10 @@ namespace SAMLSilly.Utils
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
             if (signatureAlgorithm == AlgorithmType.SHA256)
             {
-                var exportedKeyMaterial = cert.PrivateKey.ToXmlString( /* includePrivateParameters = */ true);
 
-                var cspParameters = new CspParameters(24 /* PROV_RSA_AES */);
+                var exportedKeyMaterial = cert.PrivateKey.ToXmlString(true);
+
+                var cspParameters = new CspParameters(24);
                 var key = new RSACryptoServiceProvider(cspParameters);
                 key.PersistKeyInCsp = false;
                 key.FromXmlString(exportedKeyMaterial);
@@ -317,7 +305,7 @@ namespace SAMLSilly.Utils
             }
             else
             {
-                throw new NotImplementedException(string.Format("Signing with algoritm {0} is not implemented", AlgorithmType.SHA512.ToString()));
+                throw new NotImplementedException(string.Format("Signing with algoritm {0} is not implemented", signatureAlgorithm.ToString()));
             }
 
             return signedXml;

@@ -10,27 +10,13 @@ namespace SAMLSilly.Specification
     /// </summary>
     public class SelfIssuedCertificateSpecification : ICertificateSpecification
     {
-        //private readonly ILogger _logger;
-
-        public SelfIssuedCertificateSpecification()//ILoggerFactory loggerFactory)
-        {
-            //_logger = loggerFactory.CreateLogger<SpecificationFactory>();
-        }
-        /// <summary>
-        /// Determines whether the specified certificate is considered valid by this specification.
-        /// Always returns true. No online validation attempted.
-        /// </summary>
-        /// <param name="certificate">The certificate to validate.</param>
-        /// <returns>
-        /// <c>true</c>.
-        /// </returns>
-        public bool IsSatisfiedBy(X509Certificate2 certificate)
+        public bool IsSatisfiedBy(X509Certificate2 certificate, ILogger logger)
         {
             var chainPolicy = new X509ChainPolicy
-                                  {
-                                      RevocationMode = X509RevocationMode.NoCheck,
-                                      VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority
-                                  };
+            {
+                RevocationMode = X509RevocationMode.NoCheck,
+                VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority
+            };
             var defaultCertificateValidator = X509CertificateValidator.CreateChainTrustValidator(false, chainPolicy);
 
             try
@@ -40,7 +26,7 @@ namespace SAMLSilly.Specification
             }
             catch (Exception e)
             {
-               // _logger.LogWarning(string.Format(ErrorMessages.CertificateIsNotRFC3280Valid, certificate.SubjectName.Name, certificate.Thumbprint), e);
+                logger.LogWarning(string.Format(ErrorMessages.CertificateIsNotRFC3280Valid, certificate.SubjectName.Name, certificate.Thumbprint), e);
             }
 
             return false;

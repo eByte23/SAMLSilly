@@ -11,21 +11,7 @@ namespace SAMLSilly.Specification
     /// </summary>
     public class DefaultCertificateSpecification : ICertificateSpecification
     {
-       // private readonly ILogger _logger;
-
-        public DefaultCertificateSpecification()//ILoggerFactory loggerFactory)
-        {
-            //_logger = loggerFactory.CreateLogger<SpecificationFactory>();
-        }
-
-        /// <summary>
-        /// Determines whether the specified certificate is considered valid according to the RFC3280 specification.
-        /// </summary>
-        /// <param name="certificate">The certificate to validate.</param>
-        /// <returns>
-        /// <c>true</c> if valid; otherwise, <c>false</c>.
-        /// </returns>
-        public bool IsSatisfiedBy(X509Certificate2 certificate)
+        public bool IsSatisfiedBy(X509Certificate2 certificate, ILogger logger)
         {
             var useMachineContext = false;
             var chainPolicy = new X509ChainPolicy { RevocationMode = X509RevocationMode.NoCheck };
@@ -38,7 +24,7 @@ namespace SAMLSilly.Specification
             }
             catch (Exception e)
             {
-                //_logger.LogWarning(string.Format(ErrorMessages.CertificateIsNotRFC3280Valid, certificate.SubjectName.Name, certificate.Thumbprint), e);
+                logger.LogWarning(string.Format(ErrorMessages.CertificateIsNotRFC3280Valid, certificate.SubjectName.Name, certificate.Thumbprint), e);
             }
 
             return false;

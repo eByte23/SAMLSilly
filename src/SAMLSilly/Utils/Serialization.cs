@@ -47,8 +47,11 @@ namespace SAMLSilly.Utils
         /// <returns>The deserialized item.</returns>
         public static T DeserializeFromXmlString<T>(string xml)
         {
-            var reader = new XmlTextReader(new StringReader(xml));
-            return Deserialize<T>(reader);
+            using (var stream = new StringReader(xml))
+            {
+                var reader = new XmlTextReader(stream);
+                return Deserialize<T>(reader);
+            }
         }
 
         /// <summary>
@@ -103,6 +106,9 @@ namespace SAMLSilly.Utils
 
                 stream.Seek(0, SeekOrigin.Begin);
                 serializedValue = reader.ReadToEnd();
+
+                reader.Close();
+                stream.Close();
             }
 
             return serializedValue;

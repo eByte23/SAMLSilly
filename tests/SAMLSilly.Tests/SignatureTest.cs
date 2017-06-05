@@ -11,8 +11,15 @@ namespace SAMLSilly.Tests
     /// One tests performs a "bare-bone" verification, while another verifies using the <code>Assertion</code> class.
     /// </summary>
 
-    public class SignatureTest
+    public class SignatureTest : IClassFixture<TestContext>
     {
+        private readonly TestContext _context;
+
+        public SignatureTest(TestContext context)
+        {
+            _context = context;
+        }
+
         #region Assertion verification
 
         /// <summary>
@@ -153,8 +160,8 @@ namespace SAMLSilly.Tests
                 Assert.True(true);
             }
 
-            var cert = new X509Certificate2(@"Certificates\sts_dev_certificate.pfx", "test1234");
-            Assert.True(cert.HasPrivateKey, "Certificate no longer contains a private key. Modify test.");
+            var cert = _context.Sts_Dev_cetificate;
+
             assertion.Sign(cert, null);
 
             // Check that the signature is now valid
@@ -204,7 +211,7 @@ namespace SAMLSilly.Tests
             //    signedXml.KeyInfo.AddClause(new RSAKeyValue(rsaKey));
 
             // Use X509 Certificate for signing.
-            var cert = new X509Certificate2(@"Certificates\sts_dev_certificate.pfx", "test1234");
+            var cert = Certificates.InMemoryResourceUtility.GetInMemoryCertificate("sts_dev_certificate.pfx","test1234");
             Assert.True(cert.HasPrivateKey);
             signedXml.SigningKey = cert.PrivateKey;
             signedXml.KeyInfo.AddClause(new KeyInfoX509Data(cert, X509IncludeOption.EndCertOnly));

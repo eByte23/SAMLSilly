@@ -86,6 +86,19 @@ namespace SAMLSilly.Config
             }
         }
 
+        public bool TryAddByMetadata(Uri url)
+        {
+            try
+            {
+                AddByMetadataUrl(url);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         public void AddByMetadataDirectory(string path)
         {
             AddByMetadata(Directory.GetFiles(path));
@@ -120,10 +133,13 @@ namespace SAMLSilly.Config
         {
             try
             {
-                //var metadataDoc = new Saml20MetadataDocument(file, GetEncodings());
-                //AdjustIdpListWithNewMetadata(metadataDoc);
-                //return true;
-                return false;
+                using (var stream = new FileStream(file, FileMode.Open))
+                {
+                    var metadataDoc = new Saml20MetadataDocument(stream, GetEncodings());
+                    AdjustIdpListWithNewMetadata(metadataDoc);
+                }
+                
+                return true;
             }
             catch (Exception)
             {

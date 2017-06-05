@@ -15,14 +15,26 @@ namespace SAMLSilly.Tests
     /// <see cref="Saml20Assertion"/> tests.
     /// </summary>
 
-    public class Saml20AssertionTests
+    public class Saml20AssertionTests : IClassFixture<TestContext>
     {
+        private readonly TestContext _context;
+
+        public Saml20AssertionTests(TestContext context)
+        {
+            _context = context;
+        }
         /// <summary>
         /// Constructor method tests.
         /// </summary>
 
-        public class ConstructorMethod
+        public class ConstructorMethod : IClassFixture<TestContext>
         {
+            private readonly TestContext _context;
+
+            public ConstructorMethod(TestContext context)
+            {
+                _context = context;
+            }
             #region Attribute
 
             /// <summary>
@@ -38,7 +50,7 @@ namespace SAMLSilly.Tests
                 // This needs to be addressed and is why the test is ignored. See the original Hg project
                 attributes.Add(new SamlAttribute());
 
-                var cert = AssertionUtil.GetCertificate();
+                var cert = _context.Sts_Dev_cetificate;
                 assertion.Sign(cert, null);
 
                 assertion.CheckValid(new[] { cert.PublicKey.Key });
@@ -85,7 +97,7 @@ namespace SAMLSilly.Tests
             {
                 // Arrange
                 // Any key-containing algorithm will do - the basic assertion is NOT signed anyway
-                var cert = new X509Certificate2(@"Certificates\sts_dev_certificate.pfx", "test1234");
+                var cert = _context.Sts_Dev_cetificate;
 
                 // Act
                 Assert.Throws(typeof(InvalidOperationException), () =>

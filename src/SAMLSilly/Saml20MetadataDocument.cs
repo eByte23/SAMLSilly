@@ -91,10 +91,7 @@ namespace SAMLSilly
             if (!isInitialized) throw new InvalidDataException();
         }
 
-        private static IEnumerable<Encoding> DefaultEncodings()
-        {
-            return new[] { Encoding.UTF8, Encoding.GetEncoding("iso-8859-1") };
-        }
+        private static IEnumerable<Encoding> DefaultEncodings() => new[] { Encoding.UTF8, Encoding.GetEncoding("iso-8859-1") };
 
         private static XmlDocument LoadStreamAsXmlDocument(Stream stream, IEnumerable<Encoding> encodings)
         {
@@ -107,14 +104,14 @@ namespace SAMLSilly
                 });
         }
 
-        private static XmlDocument LoadXml(string xml, IEnumerable<Encoding> encodings)
+        private static XmlDocument LoadXmlString(string xml, IEnumerable<Encoding> encodings)
         {
             return LoadAsXmlDocument(encodings, d => d.LoadXml(xml), (d, e) =>
                 {
-                    // using (var reader = new MemoryStream(e.xml, e))
-                    // {
-                    //     d.Load(reader);
-                    // }
+                    using (var reader = new StreamReader(xml, e))
+                    {
+                        d.Load(reader);
+                    }
                 });
         }
 
@@ -226,18 +223,7 @@ namespace SAMLSilly
         /// <summary>
         /// Gets the ID of the entity described in the document.
         /// </summary>
-        public string EntityId
-        {
-            get
-            {
-                if (Entity != null)
-                {
-                    return Entity.EntityID;
-                }
-
-                throw new InvalidOperationException("This instance does not contain a metadata document");
-            }
-        }
+        public string EntityId => Entity?.EntityId;
 
         /// <summary>
         /// Gets the IDP SLO endpoints.
@@ -283,7 +269,7 @@ namespace SAMLSilly
 
             Entity = new EntityDescriptor
             {
-                ID = "id" + Guid.NewGuid().ToString("N")
+                Id = "id" + Guid.NewGuid().ToString("N")
             };
 
             return Entity;
@@ -338,7 +324,7 @@ namespace SAMLSilly
         public List<KeyDescriptor> GetKeys(KeyTypes usage) => Keys.FindAll(desc => desc.Use == usage);
 
         public string ToXml() => ToXml(null);
-        public string ToXml(Encoding encoding) => ToXml(encoding, null);
+        public string ToXml(Encoding encoding) => ToXml(encoding, null, AlgorithmType.SHA256);
 
         /// <summary>
         /// Return a string containing the metadata XML based on the settings added to this instance.
@@ -348,7 +334,7 @@ namespace SAMLSilly
         /// <param name="sign">if the document should be signed</param>
         /// <param name="certificate">Certificate to be used for signing (if appropriate)</param>
         /// <returns>The XML.</returns>
-        public string ToXml(Encoding encoding, X509Certificate2 certificate)
+        public string ToXml(Encoding encoding, X509Certificate2 certificate, AlgorithmType signatureAlgorithm)
         {
             if (Entity == null)
             {
@@ -371,7 +357,7 @@ namespace SAMLSilly
 
             if (certificate != null)
             {
-                SignDocument(doc, certificate);
+                SignDocument(doc, certificate, signatureAlgorithm);
             }
 
             return doc.OuterXml;
@@ -411,35 +397,18 @@ namespace SAMLSilly
         /// Signs the document.
         /// </summary>
         /// <param name="doc">The doc.</param>
-        private static void SignDocument(XmlDocument doc, X509Certificate2 certificate)
+        private static void SignDocument(XmlDocument doc, X509Certificate2 certificate, AlgorithmType signatureAlgorithm)
         {
             if (!certificate.HasPrivateKey)
             {
                 throw new InvalidOperationException("Private key access to the signing certificate is required.");
             }
 
-            var signedXml = new SignedXml(doc);
-            signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
-            signedXml.SigningKey = certificate.PrivateKey;
-
-            // Retrieve the value of the "ID" attribute on the root assertion element.
-            var reference = new Reference("#" + doc.DocumentElement.GetAttribute("ID"));
-
-            reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
-            reference.AddTransform(new XmlDsigExcC14NTransform());
-
-            signedXml.AddReference(reference);
-
-            // Include the public key of the certificate in the assertion.
-            signedXml.KeyInfo = new KeyInfo();
-            // This was WholeChain, requiring us to trust our certs. WIF WSFed does not have this requirement,
-            // so the option was relaxed to EndCertOnly. This might need to be configurable
-            signedXml.KeyInfo.AddClause(new KeyInfoX509Data(certificate, X509IncludeOption.EndCertOnly));
-
-            signedXml.ComputeSignature();
-
-            // Append the computed signature. The signature must be placed as the sibling of the Issuer element.
-            doc.DocumentElement.InsertBefore(doc.ImportNode(signedXml.GetXml(), true), doc.DocumentElement.FirstChild);
+            XmlSignatureUtils.GenericSign(doc, doc.DocumentElement.GetAttribute("ID"), certificate, (appDoc, xmlElm) =>
+            {
+                // Append the computed signature. The signature must be placed as the sibling of the Issuer element.
+                appDoc.DocumentElement.InsertBefore(appDoc.ImportNode(xmlElm, true), appDoc.DocumentElement.FirstChild);
+            }, signatureAlgorithm);
         }
 
         /// <summary>
@@ -450,7 +419,7 @@ namespace SAMLSilly
         private void ConvertToMetadata(Saml2Configuration config)
         {
             var entity = CreateDefaultEntity();
-            entity.EntityID = config.ServiceProvider.Id;
+            entity.EntityId = config.ServiceProvider.Id;
             if (config.ServiceProvider.UseValidUntil)
             {
                 entity.ValidUntil = DateTime.Now.AddDays(7);
@@ -829,6 +798,12 @@ namespace SAMLSilly
         {
             ConvertToMetadata(config);
             return this;
+        }
+
+        public Saml20MetadataDocument Load(Stream metadataXmlStream)
+        {
+            return new Saml20MetadataDocument();
+            //return new Saml20MetadataDocument(,;
         }
     }
 }

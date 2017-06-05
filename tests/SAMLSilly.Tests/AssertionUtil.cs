@@ -194,21 +194,6 @@ namespace SAMLSilly.Tests
         }
 
         /// <summary>
-        /// Retrieve our development certificate.
-        /// </summary>
-        /// <returns>The testing certificate.</returns>
-        public static X509Certificate2 GetCertificate()
-        {
-            if (_cert == null)
-            {
-                _cert = new X509Certificate2(@"Certificates\sts_dev_certificate.pfx", "test1234");
-                Assert.True(_cert.HasPrivateKey, "Certificate no longer contains a private key. Modify test.");
-            }
-
-            return _cert;
-        }
-
-        /// <summary>
         /// Generates an unsigned assertion for use in the other tests.
         /// </summary>
         /// <returns>The XML document.</returns>

@@ -142,10 +142,6 @@ namespace SAMLSilly
 
         #endregion
 
-        public static Saml20AuthnRequest GetDefault()
-        {
-            return GetDefault(null);
-        }
         /// <summary>
         /// Returns an instance of the class with meaningful default values set.
         /// </summary>
@@ -175,6 +171,8 @@ namespace SAMLSilly
                     result.Request.ProtocolBinding = Saml20Constants.ProtocolBindings.HttpSoap;
                     break;
             }
+
+            //var idpAcceptsNameIdFormats = config.IdentityProviders[0].Metadata.
 
             // NameIDPolicy
             if (config.ServiceProvider.NameIdFormats.Count > 0)
@@ -241,8 +239,8 @@ namespace SAMLSilly
             }
 
             // Restrictions
-            var audienceRestrictions = new List<ConditionAbstract>(1);
-            var audienceRestriction = new AudienceRestriction { Audience = new List<string>(1) { config.ServiceProvider.Id } };
+            var audienceRestrictions = new List<ConditionAbstract>();
+            var audienceRestriction = new AudienceRestriction { Audience = new List<string>() { config.ServiceProvider.Id } };
             audienceRestrictions.Add(audienceRestriction);
 
             result.SetConditions(audienceRestrictions);

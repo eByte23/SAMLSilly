@@ -53,6 +53,7 @@ namespace SAMLSilly.Protocol
             foreach (var clause in keys.SelectMany(k => k.KeyInfo.Items.AsEnumerable().Where(x => x is X509Data || x is KeyInfoClause)))
             {
                 // Check certificate specifications
+                KeyInfoClause keyClause;
                 if (clause is X509Data)
                 {
                     var cert = new X509Certificate2((byte[])((X509Data)clause).Items.First());
@@ -64,14 +65,14 @@ namespace SAMLSilly.Protocol
                         continue;
                     }
 
-                    var key = XmlSignatureUtils.ExtractKey(keyInfo);
-                    yield return key;
+                    keyClause = keyInfo;
                 }
                 else
                 {
-                    var key = XmlSignatureUtils.ExtractKey((KeyInfoClause)clause);
-                    yield return key;
+                    keyClause = (KeyInfoClause)clause;
                 }
+
+                yield return XmlSignatureUtils.ExtractKey(keyClause);
             }
         }
 
@@ -83,7 +84,7 @@ namespace SAMLSilly.Protocol
         /// <returns><c>true</c> if certificate is satisfied by all specifications; otherwise, <c>false</c>.</returns>
         private static bool CertificateSatisfiesSpecifications(IdentityProvider idp, X509Certificate2 cert)
         {
-            return SpecificationFactory.GetCertificateSpecifications(idp).All(spec => spec.IsSatisfiedBy(cert));
+            return SpecificationFactory.GetCertificateSpecifications(idp).All(spec => spec.IsSatisfiedBy(cert, null));
         }
 
         /// <summary>
@@ -157,7 +158,7 @@ namespace SAMLSilly.Protocol
         {
             _logger.LogDebug(TraceMessages.AssertionPrehandlerCalled);
 
-            if (endpoint != null && endpoint.Endpoints.DefaultLogoutEndpoint != null && !string.IsNullOrEmpty(endpoint.Endpoints.DefaultLogoutEndpoint.TokenAccessor))
+            if (!string.IsNullOrEmpty(endpoint?.Endpoints?.DefaultLogoutEndpoint?.TokenAccessor))
             {
                 var idpTokenAccessor = Activator.CreateInstance(Type.GetType(endpoint.Endpoints.DefaultLogoutEndpoint.TokenAccessor, false)) as ISaml20IdpTokenAccessor;
                 if (idpTokenAccessor != null)
@@ -187,11 +188,11 @@ namespace SAMLSilly.Protocol
             //TODO: @ebyte23 FIX! Make the validate whole doc sig as well as assertion
             foreach (XmlNode n in doc.ChildNodes)
             {
-                if (n.LocalName == "Response" || n.LocalName.ToUpperInvariant() == "RESPONSE")
+                if (n.LocalName.ToUpperInvariant() == Response.ElementName.ToUpperInvariant())
                 {
                     foreach (XmlNode x in n.ChildNodes)
                     {
-                        if (x.LocalName == "Signature" || n.LocalName.ToUpperInvariant() == "Signature")
+                        if (n.LocalName.ToUpperInvariant() == Schema.XmlDSig.Signature.ElementName.ToUpperInvariant())
                         {
                             _logger.LogWarning("Two Signatures found in response, removing extra signature", samlResponse);
                             n.RemoveChild(x);

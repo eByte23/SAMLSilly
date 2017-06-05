@@ -16,8 +16,14 @@ namespace SAMLSilly.Tests
     /// <see cref="Saml20EncryptedAssertion"/> tests.
     /// </summary>
 
-    public class Saml20EncryptedAssertionTests
+    public class Saml20EncryptedAssertionTests : IClassFixture<TestContext>
     {
+        private readonly TestContext _context;
+
+        public Saml20EncryptedAssertionTests(TestContext context)
+        {
+            _context = context;
+        }
         /// <summary>
         /// Tests that it is possible to specify the algorithm of the session key.
         /// Steps:
@@ -36,15 +42,14 @@ namespace SAMLSilly.Tests
                 Assertion = AssertionUtil.GetTestAssertion()
             };
 
-            var cert = new X509Certificate2(@"Certificates\sts_dev_certificate.pfx", "test1234");
-            encryptedAssertion.TransportKey = (RSA)cert.PublicKey.Key;
+            encryptedAssertion.TransportKey = (RSA)_context.Sts_Dev_cetificate.PublicKey.Key;
 
             // Act
             encryptedAssertion.Encrypt();
             var encryptedAssertionXml = encryptedAssertion.GetXml();
 
             // Now decrypt the assertion, and verify that it recognizes the Algorithm used.
-            var decrypter = new Saml20EncryptedAssertion((RSA)cert.PrivateKey);
+            var decrypter = new Saml20EncryptedAssertion((RSA)_context.Sts_Dev_cetificate.PrivateKey);
             decrypter.LoadXml(encryptedAssertionXml.DocumentElement);
 
             // Set a wrong algorithm and make sure that the class gets it algorithm info from the assertion itself.
@@ -79,10 +84,9 @@ namespace SAMLSilly.Tests
         {
             // Arrange
             var doc = AssertionUtil.LoadXmlDocument(@"Assertions\EncryptedAssertion_01");
-            var cert = new X509Certificate2(@"Certificates\sts_dev_certificate.pfx", "test1234");
 
             // Act
-            var encryptedAssertion = new Saml20EncryptedAssertion((RSA)cert.PrivateKey, doc);
+            var encryptedAssertion = new Saml20EncryptedAssertion((RSA)_context.Sts_Dev_cetificate.PrivateKey, doc);
 
             // Assert
             Assert.Null(encryptedAssertion.Assertion);
@@ -91,9 +95,15 @@ namespace SAMLSilly.Tests
         /// <summary>
         /// Decrypt method tests.
         /// </summary>
-
-        public class DecryptMethod
+        public class DecryptMethod : IClassFixture<TestContext>
         {
+            private readonly TestContext _context;
+
+            public DecryptMethod(TestContext context)
+            {
+                _context = context;
+            }
+
             /// <summary>
             /// Attempts to decrypt the assertion in the file "EncryptedAssertion_01".
             /// </summary>
@@ -102,8 +112,7 @@ namespace SAMLSilly.Tests
             {
                 // Arrange
                 var doc = AssertionUtil.LoadXmlDocument(@"Assertions\EncryptedAssertion_01");
-                var cert = new X509Certificate2(@"Certificates\sts_dev_certificate.pfx", "test1234");
-                var encryptedAssertion = new Saml20EncryptedAssertion((RSA)cert.PrivateKey, doc);
+                var encryptedAssertion = new Saml20EncryptedAssertion((RSA)_context.Sts_Dev_cetificate.PrivateKey, doc);
 
                 // Act
                 encryptedAssertion.Decrypt();
@@ -122,8 +131,7 @@ namespace SAMLSilly.Tests
             {
                 // Arrange
                 var doc = AssertionUtil.LoadXmlDocument(@"Assertions\EncryptedAssertion_02");
-                var cert = new X509Certificate2(@"Certificates\sts_dev_certificate.pfx", "test1234");
-                var encryptedAssertion = new Saml20EncryptedAssertion((RSA)cert.PrivateKey, doc);
+                var encryptedAssertion = new Saml20EncryptedAssertion((RSA)_context.Sts_Dev_cetificate.PrivateKey, doc);
 
                 // Act
                 encryptedAssertion.Decrypt();
@@ -141,8 +149,7 @@ namespace SAMLSilly.Tests
             {
                 // Arrange
                 var doc = AssertionUtil.LoadXmlDocument(@"Assertions\EncryptedAssertion_04");
-                var cert = new X509Certificate2(@"Certificates\sts_dev_certificate.pfx", "test1234");
-                var encryptedAssertion = new Saml20EncryptedAssertion((RSA)cert.PrivateKey, doc);
+                var encryptedAssertion = new Saml20EncryptedAssertion((RSA)_context.Sts_Dev_cetificate.PrivateKey, doc);
 
                 // Act
                 encryptedAssertion.Decrypt();
@@ -161,8 +168,7 @@ namespace SAMLSilly.Tests
             {
                 // Arrange
                 var doc = AssertionUtil.LoadXmlDocument(@"Assertions\EncryptedAssertion_05");
-                var cert = new X509Certificate2(@"Certificates\sts_dev_certificate.pfx", "test1234");
-                var encryptedAssertion = new Saml20EncryptedAssertion((RSA)cert.PrivateKey, doc);
+                var encryptedAssertion = new Saml20EncryptedAssertion((RSA)_context.Sts_Dev_cetificate.PrivateKey, doc);
 
                 // Act
                 encryptedAssertion.Decrypt();
@@ -182,8 +188,7 @@ namespace SAMLSilly.Tests
             {
                 // Arrange
                 var doc = AssertionUtil.LoadXmlDocument(@"Assertions\EncryptedAssertion_03");
-                var cert = new X509Certificate2(@"Certificates\sts_dev_certificate.pfx", "test1234");
-                var encryptedAssertion = new Saml20EncryptedAssertion((RSA)cert.PrivateKey, doc);
+                var encryptedAssertion = new Saml20EncryptedAssertion((RSA)_context.Sts_Dev_cetificate.PrivateKey, doc);
 
                 // Act
                 encryptedAssertion.Decrypt();
@@ -215,7 +220,7 @@ namespace SAMLSilly.Tests
                 config.AllowedAudienceUris.Add(new Uri("https://saml.safewhere.net"));
                 config.IdentityProviders.AddByMetadataDirectory(@"Protocol\MetadataDocs\FOBS"); // Set it manually.
 
-                var cert = new X509Certificate2(@"Certificates\SafewhereTest_SFS.pfx", "test1234");
+                var cert = _context.SafewhereTest_SFS;
                 var encryptedAssertion = new Saml20EncryptedAssertion((RSA)cert.PrivateKey);
 
                 encryptedAssertion.LoadXml((XmlElement)encryptedList[0]);
@@ -249,8 +254,14 @@ namespace SAMLSilly.Tests
         /// Encrypt method tests.
         /// </summary>
 
-        public class EncrypteMethod
+        public class EncrypteMethod : IClassFixture<TestContext>
         {
+            private readonly TestContext _context;
+
+            public EncrypteMethod(TestContext context)
+            {
+                _context = context;
+            }
             /// <summary>
             /// Verify that assertions can be encrypted.
             /// </summary>
@@ -259,8 +270,7 @@ namespace SAMLSilly.Tests
             {
                 // Arrange
                 var encryptedAssertion = new Saml20EncryptedAssertion { Assertion = AssertionUtil.GetTestAssertion() };
-                var cert = new X509Certificate2(@"Certificates\sts_dev_certificate.pfx", "test1234");
-                encryptedAssertion.TransportKey = (RSA)cert.PublicKey.Key;
+                encryptedAssertion.TransportKey = (RSA)_context.Sts_Dev_cetificate.PublicKey.Key;
 
                 // Act
                 encryptedAssertion.Encrypt();

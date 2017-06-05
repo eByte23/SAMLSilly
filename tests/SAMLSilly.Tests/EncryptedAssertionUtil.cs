@@ -43,7 +43,7 @@ namespace SAMLSilly.Tests
              * If the need arises, we can easily extend the Saml20EncryptedAssertion class with a property that allows extraction key info, eg. the "recipient"
              * attribute.
              */
-            var cert = new X509Certificate2(@"Certificates\sts_dev_certificate.pfx", "test1234");
+            var cert = Certificates.InMemoryResourceUtility.GetInMemoryCertificate("sts_dev_certificate.pfx", "test1234");
 
             // ms-help://MS.MSDNQTR.v80.en/MS.MSDN.v80/MS.NETDEVFX.v20.en/CPref18/html/T_System_Security_Cryptography_Xml_KeyInfoClause_DerivedTypes.htm
             // Look through the list of KeyInfo elements to find the encrypted key.
@@ -81,6 +81,7 @@ namespace SAMLSilly.Tests
         /// </summary>
         public static void GenerateEncryptedAssertion()
         {
+            var cert = Certificates.InMemoryResourceUtility.GetInMemoryCertificate("sts_dev_certificate.pfx", "test1234");
             var assertion = AssertionUtil.GetTestAssertion();
 
             // Create an EncryptedData instance to hold the results of the encryption.o
@@ -105,7 +106,6 @@ namespace SAMLSilly.Tests
             var encryptedKey = new EncryptedKey();
 
             // Use this certificate to encrypt the key.
-            var cert = new X509Certificate2(@"Certificates\sts_dev_certificate.pfx", "test1234");
             var publicKeyRsa = cert.PublicKey.Key as RSA;
 
             Assert.True(publicKeyRsa != null, "Public key of certificate was not an RSA key. Modify test.");

@@ -26,6 +26,7 @@ namespace SAMLSilly.Utils
                 testStream.Peek();
                 result.Append(testStream.ReadToEnd());
 
+                testStream.Close();
                 stream.Close();
             }
 

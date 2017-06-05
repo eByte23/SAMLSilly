@@ -1,11 +1,12 @@
 ﻿using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Logging;
 
 namespace SAMLSilly.Specification
 {
     /// <summary>
     /// Specification interface for certificate validation
     /// </summary>
-    public interface ICertificateSpecification 
+    public interface ICertificateSpecification
     {
         /// <summary>
         /// Determines whether the specified certificate is considered valid by this specification.
@@ -14,6 +15,6 @@ namespace SAMLSilly.Specification
         /// <returns>
         /// <c>true</c> if valid; otherwise, <c>false</c>.
         /// </returns>
-        bool IsSatisfiedBy(X509Certificate2 certificate);
+        bool IsSatisfiedBy(X509Certificate2 certificate, ILogger logger);
     }
 }

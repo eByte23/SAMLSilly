@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using SAMLSilly.Config;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace SAMLSilly.Specification
 {
@@ -18,7 +19,7 @@ namespace SAMLSilly.Specification
         public static List<ICertificateSpecification> GetCertificateSpecifications(IdentityProvider endpoint)
         {
             var specs = new List<ICertificateSpecification>();
-            if (endpoint.CertificateValidationTypes != null && endpoint.CertificateValidationTypes.Count > 0)
+            if (endpoint.CertificateValidationTypes?.Count > 0)
             {
                 foreach (var elem in endpoint.CertificateValidationTypes)
                 {

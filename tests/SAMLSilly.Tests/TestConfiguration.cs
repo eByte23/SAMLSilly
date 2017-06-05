@@ -17,7 +17,7 @@ namespace SAMLSilly.Tests
                 var config = new Saml2Configuration
                 {
                     AllowedAudienceUris = new System.Collections.Generic.List<Uri> { new Uri("urn:borger.dk:id"), new Uri("https://saml.safewhere.net") },
-                    LoggingFactoryType = typeof(LoggerFactory).AssemblyQualifiedName,
+                    //LoggingFactoryType = typeof(LoggerFactory).AssemblyQualifiedName,
                 };
                // Logging.LoggerProvider.Configuration = config;
                 return config;

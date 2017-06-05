@@ -193,7 +193,7 @@ namespace SAMLSilly.Tests.Bindings
                 // Arrange
                 var url = new Uri("https://adler.safewhere.local:9031/idp/SSO.saml2?SAMLRequest=7b0HYBxJliUmL23Ke39K9UrX4HShCIBgEyTYkEAQ7MGIzeaS7B1pRyMpqyqBymVWZV1mFkDM7Z28995777333nvvvfe6O51OJ%2fff%2fz9cZmQBbPbOStrJniGAqsgfP358Hz8iHv8e7xZlepnXTVEtP%2ftod7zz0e9x9Bsnj3%2fR7qPjdTtfvsp%2f0Tpv2vTs6WcfFbP7ew8fPnhw%2f97%2bZC%2fbvzebPty59%2bn92b37kwc755O9g92P0p80kPYIUnrWNOv8bNm02bKlj3Z2DrZ37m3v7L%2fZ3X90b%2ffRvU%2fHDz69v%2fPw3t5PfZQSHsvm0S%2fa%2feyjdb18VGVN0TxaZou8edROH70%2b%2fuL5IwL5aFVXbTWtyo8IyTR9zB3U8u7mF7OmyeuWUPvoCM2%2bnRVv14%2fvyvsC66Razgq0aN4THt6m94%2fXsyJfTvNXRK%2b6mOI7%2fcr70u%2fcfqYA7AddCI%2fvOtwwOXc7s3P0%2fwA%3d&SigAlg=http%3a%2f%2fwww.w3.org%2f2000%2f09%2fxmldsig%23rsa-sha1&Signature=UsZV%2bFga0YfCQaozLomKfV8jyNt85GMIYLFoBA9jrwFfabL%2bpAWVmlhwHyAMv50uxJWFc57v2ySj5Pc6e1t0NyyaguRL8VOKqB4P3svXV5U4iU0Gq4Rp1SJu0bj538%2f01X8IINmcAJMLdrx1cqCoRmofEcPPoQODWhQoq%2brjZdE%3d");
                 var parser = new HttpRedirectBindingParser(url);
-                var cert = new X509Certificate2(@"Certificates\SafewhereTest_SFS.pfx", "test1234");
+                var cert = Certificates.InMemoryResourceUtility.GetInMemoryCertificate("SafewhereTest_SFS.pfx", "test1234");
 
                 // Act
                 var result = parser.CheckSignature(cert.PublicKey.Key);

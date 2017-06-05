@@ -43,10 +43,12 @@
         <None Include="Certificates\**\*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+
         <Content Include="Protocol\MetadataDocs\**\*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-      <EmbeddedResource Include="Certificates\sts_dev_certificate.pfx" />
+        <EmbeddedResource Include="Certificates\sts_dev_certificate.pfx" />
+        <EmbeddedResource Include="Certificates\SafewhereTest_SFS.pfx" />
     </ItemGroup>
     <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="1.0.0" />

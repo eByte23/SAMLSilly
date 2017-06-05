@@ -61,7 +61,7 @@ namespace SAMLSilly.Schema.Metadata
         /// </summary>
         /// <value>The entity ID.</value>
         [XmlAttribute("entityID", DataType = "anyURI")]
-        public string EntityID { get; set; }
+        public string EntityId { get; set; }
 
         /// <summary>
         /// Gets or sets the ID.
@@ -69,7 +69,7 @@ namespace SAMLSilly.Schema.Metadata
         /// </summary>
         /// <value>The ID.</value>
         [XmlAttribute("ID", DataType = "ID")]
-        public string ID { get; set; }
+        public string Id { get; set; }
 
         /// <summary>
         /// Gets or sets the valid until string.
@@ -115,7 +115,7 @@ namespace SAMLSilly.Schema.Metadata
         /// <value>The extensions.</value>
         [XmlElement("Extensions", Order = 2)]
         public ExtensionType Extensions { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the items.
         /// <c>&lt;RoleDescriptor&gt;</c>, <c>&lt;IdpSsoDescriptor&gt;</c>, <c>&lt;SpSsoDescriptor&gt;,</c>

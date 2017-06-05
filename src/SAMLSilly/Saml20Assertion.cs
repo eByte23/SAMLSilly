@@ -226,6 +226,7 @@ namespace SAMLSilly
         /// <summary>
         /// Gets a value indicating whether the expiration time has been exceeded.
         /// </summary>
+        //TODO: Exection Method
         public bool IsExpired
         {
             get { return Now > NotOnOrAfter; }

@@ -13,7 +13,8 @@ namespace SAMLSilly.Utils
         /// Copies one stream to another stream
         /// </summary>
         /// <returns>A new stream</returns>
-        public static void CopyTo35(this Stream input, Stream output)
+#if NET35
+        public static void CopyTo(this Stream input, Stream output)
         {
             byte[] buffer = new byte[16 * 1024]; // Fairly arbitrary size
             int bytesRead;
@@ -23,5 +24,6 @@ namespace SAMLSilly.Utils
                 output.Write(buffer, 0, bytesRead);
             }
         }
+#endif
     }
 }

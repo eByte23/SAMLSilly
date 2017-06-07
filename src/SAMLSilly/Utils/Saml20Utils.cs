@@ -14,7 +14,7 @@ namespace SAMLSilly.Utils
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The represented DateTime.</returns>
-        public static DateTime FromUtcString(string value)
+        public static DateTime FromUtcString(this string value)
         {
             try
             {
@@ -31,7 +31,7 @@ namespace SAMLSilly.Utils
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The DateTime represented as a UTC string.</returns>
-        public static string ToUtcString(DateTime value)
+        public static string ToUtcString(this DateTime value)
         {
             return XmlConvert.ToString(value, XmlDateTimeSerializationMode.Utc);
         }
@@ -41,7 +41,7 @@ namespace SAMLSilly.Utils
         /// </summary>
         /// <param name="id">The id.</param>
         /// <returns>True if the id is valid, else false.</returns>
-        public static bool ValidateIdString(string id)
+        public static bool ValidateIdString(this string id)
         {
             return id != null && id.Length >= 16;
         }
@@ -51,9 +51,9 @@ namespace SAMLSilly.Utils
         /// </summary>
         /// <param name="optString">The opt string.</param>
         /// <returns>True if the string is value, else false.</returns>
-        public static bool ValidateOptionalString(string optString)
+        public static bool ValidateOptionalString(this string optString)
         {
-            return optString == null || ValidateRequiredString(optString);
+            return optString == null || optString.ValidateRequiredString();
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace SAMLSilly.Utils
         /// </summary>
         /// <param name="reqString">The required string.</param>
         /// <returns>True if the string is value, else false.</returns>
-        public static bool ValidateRequiredString(string reqString)
+        public static bool ValidateRequiredString(this string reqString)
         {
             return !(string.IsNullOrEmpty(reqString) || reqString.Trim().Length == 0);
         }

@@ -187,7 +187,7 @@ namespace SAMLSilly.Validation
         private void ValidateAssertionAttributes(Assertion assertion)
         {
             // There must be a Version
-            if (!Saml20Utils.ValidateRequiredString(assertion.Version))
+            if (!assertion.Version.ValidateRequiredString())
             {
                 throw new Saml20FormatException("Assertion element must have the Version attribute set.");
             }

@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+    <DebugType>portable</DebugType>
+    <AssemblyName>SAMLSilly.AspNetCore</AssemblyName>
+    <PackageId>SAMLSilly.AspNetCore</PackageId>
+  </PropertyGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="1.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.2" />
+        <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="SAMLSilly">
+      <HintPath>..\..\..\..\..\personal\ebyte23\SAMLSilly\src\SAMLSilly\bin\Debug\net461\SAMLSilly.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

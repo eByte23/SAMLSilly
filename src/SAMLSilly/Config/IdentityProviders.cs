@@ -67,7 +67,7 @@ namespace SAMLSilly.Config
                 {
                     using (var response = request.GetResponse().GetResponseStream())
                     {
-                        response.CopyTo35(ms);
+                        response.CopyTo(ms);
                         response.Close();
                     }
                     ms.Seek(0, SeekOrigin.Begin); // Rewind memorystream back to the beginning
@@ -138,7 +138,7 @@ namespace SAMLSilly.Config
                     var metadataDoc = new Saml20MetadataDocument(stream, GetEncodings());
                     AdjustIdpListWithNewMetadata(metadataDoc);
                 }
-                
+
                 return true;
             }
             catch (Exception)

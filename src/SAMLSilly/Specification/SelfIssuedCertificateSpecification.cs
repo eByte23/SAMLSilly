@@ -26,7 +26,10 @@ namespace SAMLSilly.Specification
             }
             catch (Exception e)
             {
-                logger.LogWarning(string.Format(ErrorMessages.CertificateIsNotRFC3280Valid, certificate.SubjectName.Name, certificate.Thumbprint), e);
+                if (logger != null)
+                {
+                    logger.LogWarning(string.Format(ErrorMessages.CertificateIsNotRFC3280Valid, certificate.SubjectName.Name, certificate.Thumbprint), e);
+                }
             }
 
             return false;

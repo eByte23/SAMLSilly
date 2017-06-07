@@ -53,5 +53,12 @@ namespace SAMLSilly.Tests
             var metadata = new Saml20MetadataDocument().Load(FileLoadUtils.GetStream(@"Protocol\MetadataDocs\metadata-HAIKU.xml"));
 
         }
+
+        [Fact]
+        public void Parse_metadata_from_xml_test_idp()
+        {
+            var metadata = new Saml20MetadataDocument().Load(FileLoadUtils.GetStream(@"Protocol\MetadataDocs\inlogik-test-adfs-metadata.xml"));
+            var a = metadata.EntityId;
+        }
     }
 }

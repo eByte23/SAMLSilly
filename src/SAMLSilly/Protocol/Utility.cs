@@ -477,7 +477,7 @@ namespace SAMLSilly.Protocol
                     throw new Saml20Exception(ErrorMessages.ResponseStatusIsNoPassive);
                 }
 
-                var error = string.Format("{0} {1}", status.StatusCode.Value ?? "", status.StatusCode.SubStatusCode.Value ?? "");
+                var error = string.Format("{0} {1}", status.StatusCode?.Value ?? "", status.StatusCode?.SubStatusCode?.Value ?? "");
                 _logger.LogError(ErrorMessages.ResponseStatusNotSuccessful, error);
                 throw new Saml20Exception(string.Format(ErrorMessages.ResponseStatusNotSuccessful, error));
             }

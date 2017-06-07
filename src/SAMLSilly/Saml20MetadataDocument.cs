@@ -22,6 +22,10 @@ namespace SAMLSilly
     /// </summary>
     public class Saml20MetadataDocument
     {
+        private List<Endpoint> _attributeQueryEndpoints;
+        private Dictionary<int, IndexedEndpoint> _spArsEndpoints;
+        private object _idpArsEndpoints;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Saml20MetadataDocument"/> class.
         /// </summary>
@@ -50,162 +54,158 @@ namespace SAMLSilly
 
             ExtractKeyDescriptors(entityDescriptor);
             Entity = Serialization.DeserializeFromXmlString<EntityDescriptor>(entityDescriptor.OuterXml);
+            ExtractEndpoints();
         }
 
         public Saml20MetadataDocument(Stream document, IEnumerable<Encoding> encodings)
         {
-            if (document == null) throw new ArgumentNullException("file");
-
-            try
-            {
-                var doc = LoadStreamAsXmlDocument(document, encodings ?? DefaultEncodings());
-                InitializeDocument(doc);
-            }
-            catch (Exception e)
-            {
-                // Probably not a metadata file.
-                throw new InvalidDataException("Problem parsing metadata file", e);
-            }
+            LoadXmlStream(document, encodings);
         }
 
-        private void InitializeDocument(XmlDocument doc)
+        public static IEnumerable<Encoding> DefaultEncodings => new[] { Encoding.UTF8, Encoding.GetEncoding("iso-8859-1") };
+
+        public Saml20MetadataDocument LoadXmlStream(Stream stream)
+            => LoadXmlStream(stream, null);
+
+        public Saml20MetadataDocument LoadXmlStream(Stream stream, IEnumerable<Encoding> encodings)
+            => LoadXmlDocument(x => x.Load(stream), encodings);
+        public Saml20MetadataDocument LoadXmlString(string xml)
+            => LoadXmlString(xml, null);
+
+        public Saml20MetadataDocument LoadXmlString(string xml, IEnumerable<Encoding> encodings)
+            => LoadXmlDocument(x => x.LoadXml(xml), encodings);
+
+        public Saml20MetadataDocument LoadXmlDocument(Action<XmlDocument> docLoad, IEnumerable<Encoding> encodings)
         {
-            if (doc == null) throw new InvalidOperationException("Metadata not a valid document");
+            var doc = new XmlDocument { PreserveWhitespace = true };
+            docLoad(doc);
+
+            return LoadXmlDocument(doc, encodings);
+        }
+
+        public Saml20MetadataDocument LoadXmlDocument(XmlDocument document, IEnumerable<Encoding> encodings)
+        {
+            if (document == null) throw new InvalidOperationException("Metadata not a valid document");
+
             var isInitialized = false;
-            foreach (var child in doc.ChildNodes.Cast<XmlNode>().Where(child => child.NamespaceURI == Saml20Constants.Metadata))
+            foreach (var child in document.ChildNodes.Cast<XmlNode>().Where(child => child.NamespaceURI == Saml20Constants.Metadata))
             {
                 if (child.LocalName == EntityDescriptor.ElementName)
                 {
-                    Initialize(doc);
+                    Initialize(document);
                     isInitialized = true;
                 }
 
-                // TODO Decide how to handle several entities in one metadata file.
+                // TODO: Decide how to handle several entities in one metadata file.
                 if (child.LocalName == EntitiesDescriptor.ElementName)
                 {
-                    throw new NotImplementedException();
+                    throw new NotImplementedException($"Multiple {EntitiesDescriptor.ElementName} elements");
                 }
             }
 
             // No entity descriptor found.
             if (!isInitialized) throw new InvalidDataException();
+
+            return this;
         }
 
-        private static IEnumerable<Encoding> DefaultEncodings() => new[] { Encoding.UTF8, Encoding.GetEncoding("iso-8859-1") };
 
-        private static XmlDocument LoadStreamAsXmlDocument(Stream stream, IEnumerable<Encoding> encodings)
-        {
-            return LoadAsXmlDocument(encodings,
-                d => d.Load(stream),
-                (d, e) =>
-                {
-                    var reader = new StreamReader(stream, e);
-                    d.Load(reader);
-                });
-        }
+        #region stuff i want to remove
+        // /// <summary>
+        // /// Loads a file into an XmlDocument. If the loading or the signature check fails, the method will retry using another encoding.
+        // /// </summary>
+        // /// <param name="filename">The filename.</param>
+        // /// <returns>The XML document.</returns>
+        // private static XmlDocument LoadAsXmlDocument(IEnumerable<Encoding> encodings, Action<XmlDocument> docLoad, Action<XmlDocument, Encoding> quirksModeDocLoad)
+        // {
+        //     var doc = new XmlDocument { PreserveWhitespace = true };
 
-        private static XmlDocument LoadXmlString(string xml, IEnumerable<Encoding> encodings)
-        {
-            return LoadAsXmlDocument(encodings, d => d.LoadXml(xml), (d, e) =>
-                {
-                    using (var reader = new StreamReader(xml, e))
-                    {
-                        d.Load(reader);
-                    }
-                });
-        }
+        //     try
+        //     {
+        //         // First attempt a standard load, where the XML document is expected to declare its encoding by itself.
+        //         docLoad(doc);
+        //         try
+        //         {
+        //             if (XmlSignatureUtils.IsSigned(doc) && !XmlSignatureUtils.CheckSignature(doc))
+        //             {
+        //                 // Bad, bad, bad... never use exceptions for control flow! Who wrote this?
+        //                 // Throw an exception to get into quirksmode.
+        //                 throw new InvalidOperationException("Invalid file signature");
+        //             }
+        //         }
+        //         catch (CryptographicException)
+        //         {
+        //             // Ignore cryptographic exception caused by Geneva server's inability to generate a
+        //             // .NET compliant xml signature
+        //             return ParseGenevaServerMetadata(doc);
+        //         }
 
-        /// <summary>
-        /// Loads a file into an XmlDocument. If the loading or the signature check fails, the method will retry using another encoding.
-        /// </summary>
-        /// <param name="filename">The filename.</param>
-        /// <returns>The XML document.</returns>
-        private static XmlDocument LoadAsXmlDocument(IEnumerable<Encoding> encodings, Action<XmlDocument> docLoad, Action<XmlDocument, Encoding> quirksModeDocLoad)
-        {
-            var doc = new XmlDocument { PreserveWhitespace = true };
+        //         return doc;
+        //     }
+        //     catch (XmlException)
+        //     {
+        //         // Enter quirksmode
+        //         foreach (var encoding in encodings)
+        //         {
+        //             StreamReader reader = null;
+        //             try
+        //             {
+        //                 quirksModeDocLoad(doc, encoding);
+        //                 if (XmlSignatureUtils.IsSigned(doc) && !XmlSignatureUtils.CheckSignature(doc))
+        //                 {
+        //                     continue;
+        //                 }
+        //             }
+        //             catch (XmlException)
+        //             {
+        //                 continue;
+        //             }
+        //             finally
+        //             {
+        //                 if (reader != null)
+        //                 {
+        //                     reader.Close();
+        //                 }
+        //             }
 
-            try
-            {
-                // First attempt a standard load, where the XML document is expected to declare its encoding by itself.
-                docLoad(doc);
-                try
-                {
-                    if (XmlSignatureUtils.IsSigned(doc) && !XmlSignatureUtils.CheckSignature(doc))
-                    {
-                        // Bad, bad, bad... never use exceptions for control flow! Who wrote this?
-                        // Throw an exception to get into quirksmode.
-                        throw new InvalidOperationException("Invalid file signature");
-                    }
-                }
-                catch (CryptographicException)
-                {
-                    // Ignore cryptographic exception caused by Geneva server's inability to generate a
-                    // .NET compliant xml signature
-                    return ParseGenevaServerMetadata(doc);
-                }
+        //             return doc;
+        //         }
+        //     }
 
-                return doc;
-            }
-            catch (XmlException)
-            {
-                // Enter quirksmode
-                foreach (var encoding in encodings)
-                {
-                    StreamReader reader = null;
-                    try
-                    {
-                        quirksModeDocLoad(doc, encoding);
-                        if (XmlSignatureUtils.IsSigned(doc) && !XmlSignatureUtils.CheckSignature(doc))
-                        {
-                            continue;
-                        }
-                    }
-                    catch (XmlException)
-                    {
-                        continue;
-                    }
-                    finally
-                    {
-                        if (reader != null)
-                        {
-                            reader.Close();
-                        }
-                    }
+        //     return null;
+        // }
+        #endregion
 
-                    return doc;
-                }
-            }
+        #region stuff i want to remove
+        // /// <summary>
+        // /// Parses the geneva server metadata.
+        // /// </summary>
+        // /// <param name="doc">The doc.</param>
+        // /// <returns>The XML document.</returns>
+        // private static XmlDocument ParseGenevaServerMetadata(XmlDocument doc)
+        // {
+        //     if (doc == null)
+        //     {
+        //         throw new ArgumentNullException("doc");
+        //     }
 
-            return null;
-        }
+        //     if (doc.DocumentElement == null)
+        //     {
+        //         throw new ArgumentException("DocumentElement cannot be null", "doc");
+        //     }
 
-        /// <summary>
-        /// Parses the geneva server metadata.
-        /// </summary>
-        /// <param name="doc">The doc.</param>
-        /// <returns>The XML document.</returns>
-        private static XmlDocument ParseGenevaServerMetadata(XmlDocument doc)
-        {
-            if (doc == null)
-            {
-                throw new ArgumentNullException("doc");
-            }
+        //     var other = new XmlDocument { PreserveWhitespace = true };
+        //     other.LoadXml(doc.OuterXml);
 
-            if (doc.DocumentElement == null)
-            {
-                throw new ArgumentException("DocumentElement cannot be null", "doc");
-            }
+        //     foreach (var node in other.DocumentElement.ChildNodes.Cast<XmlNode>().Where(node => node.Name != IdpSsoDescriptor.ElementName).ToList())
+        //     {
+        //         other.DocumentElement.RemoveChild(node);
+        //     }
 
-            var other = new XmlDocument { PreserveWhitespace = true };
-            other.LoadXml(doc.OuterXml);
+        //     return other;
+        // }
 
-            foreach (var node in other.DocumentElement.ChildNodes.Cast<XmlNode>().Where(node => node.Name != IdpSsoDescriptor.ElementName).ToList())
-            {
-                other.DocumentElement.RemoveChild(node);
-            }
-
-            return other;
-        }
+        #endregion
 
         /// <summary>
         /// Gets the endpoints specified in the <c>&lt;AssertionConsumerService&gt;</c> element in the <c>SpSsoDescriptor</c>.
@@ -228,13 +228,13 @@ namespace SAMLSilly
         /// <summary>
         /// Gets the IDP SLO endpoints.
         /// </summary>
-        public List<IdentityProviderEndpoint> IDPSLOEndpoints { get; set; }
+        public List<IdentityProviderEndpoint> IDPSLOEndpoints { get; set; } = new List<IdentityProviderEndpoint>();
 
 
         /// <summary>
         /// Gets the keys contained in the metadata document.
         /// </summary>
-        public List<KeyDescriptor> Keys { get; set; }
+        public List<KeyDescriptor> Keys { get; set; } = new List<KeyDescriptor>();
 
 
         /// <summary>
@@ -245,15 +245,15 @@ namespace SAMLSilly
         /// <summary>
         /// Gets the SP SLO endpoints.
         /// </summary>
-        public List<IdentityProviderEndpoint> SPSLOEndpoints { get; set; }
+        public List<IdentityProviderEndpoint> SPSLOEndpoints { get; set; } = new List<IdentityProviderEndpoint>();
 
 
         /// <summary>
         /// Gets the SSO endpoints.
         /// </summary>
-        public List<IdentityProviderEndpoint> SSOEndpoints { get; set; }
+        public List<IdentityProviderEndpoint> SSOEndpoints { get; set; } = new List<IdentityProviderEndpoint>();
 
-        public Dictionary<int, IndexedEndpoint> IDPArsEndpoints { get; set; }
+        public Dictionary<int, IndexedEndpoint> IDPArsEndpoints { get; set; } = new Dictionary<int, IndexedEndpoint>();
 
 
         /// <summary>
@@ -292,13 +292,13 @@ namespace SAMLSilly
         /// <returns>The List of attribute query endpoints.</returns>
         public List<Endpoint> GetAttributeQueryEndpoints()
         {
-            // if (_attributeQueryEndpoints == null)
-            // {
-            //     ExtractEndpoints();
-            // }
+            if (_attributeQueryEndpoints == null)
+            {
+                ExtractEndpoints();
+            }
 
-            // return _attributeQueryEndpoints;
-            return new List<Endpoint>();
+            return _attributeQueryEndpoints;
+            //return new List<Endpoint>();
         }
 
         /// <summary>
@@ -598,9 +598,9 @@ namespace SAMLSilly
                 SSOEndpoints = new List<IdentityProviderEndpoint>();
                 IDPArsEndpoints = new Dictionary<int, IndexedEndpoint>();
                 SPSLOEndpoints = new List<IdentityProviderEndpoint>();
-                //_spArsEndpoints = new Dictionary<int, IndexedEndpoint>();
+                _spArsEndpoints = new Dictionary<int, IndexedEndpoint>();
                 AssertionConsumerServiceEndpoints = new List<IdentityProviderEndpoint>();
-                //_attributeQueryEndpoints = new List<Endpoint>();
+                _attributeQueryEndpoints = new List<Endpoint>();
 
                 foreach (var item in Entity.Items)
                 {
@@ -747,7 +747,7 @@ namespace SAMLSilly
                         {
                             foreach (var ie in descriptor.ArtifactResolutionService)
                             {
-                                //_spArsEndpoints.Add(ie.Index, ie);
+                                _spArsEndpoints.Add(ie.Index, ie);
                             }
                         }
                     }
@@ -755,7 +755,7 @@ namespace SAMLSilly
                     if (item is AttributeAuthorityDescriptor)
                     {
                         var aad = (AttributeAuthorityDescriptor)item;
-                        //_attributeQueryEndpoints.AddRange(aad.AttributeService);
+                        _attributeQueryEndpoints.AddRange(aad.AttributeService);
                     }
                 }
             }
@@ -800,10 +800,7 @@ namespace SAMLSilly
             return this;
         }
 
-        public Saml20MetadataDocument Load(Stream metadataXmlStream)
-        {
-            return new Saml20MetadataDocument();
-            //return new Saml20MetadataDocument(,;
-        }
+        public Saml20MetadataDocument Load(Stream metadataXmlStream) => LoadXmlStream(metadataXmlStream);
+
     }
 }

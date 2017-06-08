@@ -23,46 +23,6 @@ namespace SAMLSilly
     public class Saml20MetadataDocument
     {
         /// <summary>
-        /// AssertionConsumerServiceEndpoints backing field.
-        /// </summary>
-        private List<IdentityProviderEndpoint> _assertionConsumerServiceEndpoints;
-
-        /// <summary>
-        /// Attribute query endpoints.
-        /// </summary>
-        private List<Endpoint> _attributeQueryEndpoints;
-
-        /// <summary>
-        /// ARSEndpoints backing field.
-        /// </summary>
-        private Dictionary<int, IndexedEndpoint> _idpArsEndpoints;
-
-        /// <summary>
-        /// SLOEndpoints backing field.
-        /// </summary>
-        private List<IdentityProviderEndpoint> _idpSloEndpoints;
-
-        /// <summary>
-        /// The keys.
-        /// </summary>
-        private List<KeyDescriptor> _keys;
-
-        /// <summary>
-        /// ARSEndpoints backing field.
-        /// </summary>
-        private Dictionary<int, IndexedEndpoint> _spArsEndpoints;
-
-        /// <summary>
-        /// SLOEndpoints backing field.
-        /// </summary>
-        private List<IdentityProviderEndpoint> _spSloEndpoints;
-
-        /// <summary>
-        /// SSOEndpoints backing field.
-        /// </summary>
-        private List<IdentityProviderEndpoint> _ssoEndpoints;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="Saml20MetadataDocument"/> class.
         /// </summary>
         public Saml20MetadataDocument() { }
@@ -77,82 +37,19 @@ namespace SAMLSilly
             Initialize(entityDescriptor);
         }
 
+        public bool Signed { get; private set; }
+        public bool ValidSignature { get; private set; }
+
         private void Initialize(XmlDocument entityDescriptor)
         {
             if (XmlSignatureUtils.IsSigned(entityDescriptor))
             {
-                if (!XmlSignatureUtils.CheckSignature(entityDescriptor))
-                {
-                    throw new Saml20Exception("Metadata signature could not be verified.");
-                }
+                Signed = true;
+                ValidSignature = XmlSignatureUtils.CheckSignature(entityDescriptor);
             }
 
             ExtractKeyDescriptors(entityDescriptor);
             Entity = Serialization.DeserializeFromXmlString<EntityDescriptor>(entityDescriptor.OuterXml);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Saml20MetadataDocument"/> class.
-        /// </summary>
-        /// <param name="sign">if set to <c>true</c> the metadata document will be signed.</param>
-        public Saml20MetadataDocument(bool sign = false)
-            : this()
-        {
-            Sign = sign;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Saml20MetadataDocument"/> class.
-        /// </summary>
-        /// <param name="config">The config.</param>
-        /// <param name="keyinfo">key information for the service provider certificate.</param>
-        /// <param name="sign">if set to <c>true</c> the metadata document will be signed.</param>
-        public Saml20MetadataDocument(Saml2Configuration config, KeyInfo keyinfo, bool sign = false)
-            : this(sign)
-        {
-            ConvertToMetadata(config, keyinfo);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Saml20MetadataDocument"/> class.
-        /// </summary>
-        /// <param name="config">The config.</param>
-        /// <param name="cert">The certificate for Service Provider</param>
-        /// <param name="sign">if set to <c>true</c> the metadata document will be signed.</param>
-        public Saml20MetadataDocument(Saml2Configuration config, X509Certificate2 cert, bool sign = false)
-            : this(sign)
-        {
-            KeyInfo keyInfo = new KeyInfo();
-            KeyInfoX509Data keyInfoData = new KeyInfoX509Data();
-            keyInfoData.AddCertificate(cert);
-            keyInfo.AddClause(keyInfoData);
-
-            ConvertToMetadata(config, keyInfo);
-        }
-
-        /// <summary>
-        /// Parses the metadata files found in the directory specified in the configuration.
-        /// </summary>
-        /// <param name="file">The file.</param>
-        /// <returns>The parsed <see cref="Saml20MetadataDocument"/>.</returns>
-        public Saml20MetadataDocument(string file)
-            : this(file, null)
-        { }
-
-        public Saml20MetadataDocument(string file, IEnumerable<Encoding> encodings)
-        {
-            if (file == null) throw new ArgumentNullException("file");
-
-            try
-            {
-                var doc = LoadFileAsXmlDocument(file, encodings ?? DefaultEncodings());
-                InitializeDocument(doc);
-            }
-            catch (Exception e)
-            {
-                // Probably not a metadata file.
-                throw new InvalidDataException("Problem parsing metadata file", e);
-            }
         }
 
         public Saml20MetadataDocument(Stream document, IEnumerable<Encoding> encodings)
@@ -210,14 +107,14 @@ namespace SAMLSilly
                 });
         }
 
-        private static XmlDocument LoadFileAsXmlDocument(string filename, IEnumerable<Encoding> encodings)
+        private static XmlDocument LoadXml(string xml, IEnumerable<Encoding> encodings)
         {
-            return LoadAsXmlDocument(encodings,
-                d => d.Load(filename),
-                (d, e) =>
+            return LoadAsXmlDocument(encodings, d => d.LoadXml(xml), (d, e) =>
                 {
-                    var reader = new StreamReader(filename, e);
-                    d.Load(reader);
+                    // using (var reader = new MemoryStream(e.xml, e))
+                    // {
+                    //     d.Load(reader);
+                    // }
                 });
         }
 
@@ -317,24 +214,14 @@ namespace SAMLSilly
         /// Gets the endpoints specified in the <c>&lt;AssertionConsumerService&gt;</c> element in the <c>SpSsoDescriptor</c>.
         /// These endpoints are only applicable if we are reading metadata issued by a service provider.
         /// </summary>
-        public List<IdentityProviderEndpoint> AssertionConsumerServiceEndpoints
-        {
-            get
-            {
-                if (_assertionConsumerServiceEndpoints == null)
-                {
-                    ExtractEndpoints();
-                }
+        public List<IdentityProviderEndpoint> AssertionConsumerServiceEndpoints { get; set; }
 
-                return _assertionConsumerServiceEndpoints;
-            }
-        }
 
         /// <summary>
         /// Gets the entity.
         /// </summary>
         /// <value>The entity.</value>
-        public EntityDescriptor Entity { get; private set; }
+        public EntityDescriptor Entity { get; set; }
 
         /// <summary>
         /// Gets the ID of the entity described in the document.
@@ -355,34 +242,14 @@ namespace SAMLSilly
         /// <summary>
         /// Gets the IDP SLO endpoints.
         /// </summary>
-        public List<IdentityProviderEndpoint> IDPSLOEndpoints
-        {
-            get
-            {
-                if (_idpSloEndpoints == null)
-                {
-                    ExtractEndpoints();
-                }
+        public List<IdentityProviderEndpoint> IDPSLOEndpoints { get; set; }
 
-                return _idpSloEndpoints;
-            }
-        }
 
         /// <summary>
         /// Gets the keys contained in the metadata document.
         /// </summary>
-        public List<KeyDescriptor> Keys
-        {
-            get
-            {
-                if (_keys == null)
-                {
-                    ExtractKeyDescriptors();
-                }
+        public List<KeyDescriptor> Keys { get; set; }
 
-                return _keys;
-            }
-        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the metadata should be signed when the ToXml() method is called.
@@ -392,34 +259,16 @@ namespace SAMLSilly
         /// <summary>
         /// Gets the SP SLO endpoints.
         /// </summary>
-        public List<IdentityProviderEndpoint> SPSLOEndpoints
-        {
-            get
-            {
-                if (_spSloEndpoints == null)
-                {
-                    ExtractEndpoints();
-                }
+        public List<IdentityProviderEndpoint> SPSLOEndpoints { get; set; }
 
-                return _spSloEndpoints;
-            }
-        }
 
         /// <summary>
         /// Gets the SSO endpoints.
         /// </summary>
-        public List<IdentityProviderEndpoint> SSOEndpoints
-        {
-            get
-            {
-                if (_ssoEndpoints == null)
-                {
-                    ExtractEndpoints();
-                }
+        public List<IdentityProviderEndpoint> SSOEndpoints { get; set; }
 
-                return _ssoEndpoints;
-            }
-        }
+        public Dictionary<int, IndexedEndpoint> IDPArsEndpoints { get; set; }
+
 
         /// <summary>
         /// Creates a default entity in the
@@ -432,7 +281,10 @@ namespace SAMLSilly
                 throw new InvalidOperationException("An entity is already created in this document.");
             }
 
-            Entity = GetDefaultEntityInstance();
+            Entity = new EntityDescriptor
+            {
+                ID = "id" + Guid.NewGuid().ToString("N")
+            };
 
             return Entity;
         }
@@ -444,8 +296,8 @@ namespace SAMLSilly
         /// <returns>The artifact resolution service endpoint.</returns>
         public string GetIDPARSEndpoint(ushort index)
         {
-            var ep = _idpArsEndpoints[index];
-            return ep != null ? ep.Location : string.Empty;
+            var ep = IDPArsEndpoints[index];
+            return ep?.Location ?? string.Empty;
         }
 
         /// <summary>
@@ -454,12 +306,13 @@ namespace SAMLSilly
         /// <returns>The List of attribute query endpoints.</returns>
         public List<Endpoint> GetAttributeQueryEndpoints()
         {
-            if (_attributeQueryEndpoints == null)
-            {
-                ExtractEndpoints();
-            }
+            // if (_attributeQueryEndpoints == null)
+            // {
+            //     ExtractEndpoints();
+            // }
 
-            return _attributeQueryEndpoints;
+            // return _attributeQueryEndpoints;
+            return new List<Endpoint>();
         }
 
         /// <summary>
@@ -482,20 +335,26 @@ namespace SAMLSilly
         /// </summary>
         /// <param name="usage">The usage.</param>
         /// <returns>A list containing the keys. If no key is marked with the given usage, the method returns an empty list.</returns>
-        public List<KeyDescriptor> GetKeys(KeyTypes usage)
-        {
-            return Keys.FindAll(desc => desc.Use == usage);
-        }
+        public List<KeyDescriptor> GetKeys(KeyTypes usage) => Keys.FindAll(desc => desc.Use == usage);
+
+        public string ToXml() => ToXml(null);
+        public string ToXml(Encoding encoding) => ToXml(encoding, null);
 
         /// <summary>
         /// Return a string containing the metadata XML based on the settings added to this instance.
         /// The resulting XML will be signed, if the AsymmetricAlgorithm property has been set.
         /// </summary>
         /// <param name="encoding">The encoding.</param>
+        /// <param name="sign">if the document should be signed</param>
         /// <param name="certificate">Certificate to be used for signing (if appropriate)</param>
         /// <returns>The XML.</returns>
         public string ToXml(Encoding encoding, X509Certificate2 certificate)
         {
+            if (Entity == null)
+            {
+                throw new InvalidOperationException("You are trying to sign an empty or uninitialized metadata document");
+            }
+
             encoding = encoding ?? Encoding.UTF8;
             var doc = new XmlDocument { PreserveWhitespace = true };
             doc.LoadXml(Serialization.SerializeToXmlString(Entity));
@@ -510,7 +369,7 @@ namespace SAMLSilly
                 doc.PrependChild(doc.CreateXmlDeclaration("1.0", encoding.WebName, null));
             }
 
-            if (Sign)
+            if (certificate != null)
             {
                 SignDocument(doc, certificate);
             }
@@ -546,20 +405,6 @@ namespace SAMLSilly
                 default:
                     throw new InvalidOperationException(string.Format("Unsupported SAML binding {0}", Enum.GetName(typeof(BindingType), samlBinding)));
             }
-        }
-
-        /// <summary>
-        /// Gets the default entity instance.
-        /// </summary>
-        /// <returns>The default <see cref="EntityDescriptor"/>.</returns>
-        private static EntityDescriptor GetDefaultEntityInstance()
-        {
-            var result = new EntityDescriptor
-            {
-                ID = "id" + Guid.NewGuid().ToString("N")
-            };
-
-            return result;
         }
 
         /// <summary>
@@ -602,7 +447,7 @@ namespace SAMLSilly
         /// </summary>
         /// <param name="config">The config.</param>
         /// <param name="keyInfo">The keyInfo.</param>
-        private void ConvertToMetadata(Saml2Configuration config, KeyInfo keyInfo)
+        private void ConvertToMetadata(Saml2Configuration config)
         {
             var entity = CreateDefaultEntity();
             entity.EntityID = config.ServiceProvider.Id;
@@ -612,11 +457,11 @@ namespace SAMLSilly
             }
 
             var serviceProviderDescriptor = new SpSsoDescriptor
-                                   {
-                                       ProtocolSupportEnumeration = new[] { Saml20Constants.Protocol },
-                                       AuthnRequestsSigned = XmlConvert.ToString(config.ServiceProvider.AuthNRequestsSigned),
-                                       WantAssertionsSigned = XmlConvert.ToString(config.ServiceProvider.WantAssertionsSigned)
-                                   };
+            {
+                ProtocolSupportEnumeration = new[] { Saml20Constants.Protocol },
+                AuthnRequestsSigned = XmlConvert.ToString(config.ServiceProvider.AuthNRequestsSigned),
+                WantAssertionsSigned = XmlConvert.ToString(config.ServiceProvider.WantAssertionsSigned)
+            };
 
             if (config.ServiceProvider.NameIdFormats.Count > 0)
             {
@@ -640,22 +485,22 @@ namespace SAMLSilly
                 if (endpoint.Type == EndpointType.SignOn)
                 {
                     var loginEndpoint = new IndexedEndpoint
-                                            {
-                                                Index = endpoint.Index,
-                                                IsDefault = true,
-                                                Location = new Uri(baseUrl, endpoint.LocalPath).ToString(),
-                                                Binding = GetBinding(endpoint.Binding, Saml20Constants.ProtocolBindings.HttpPost)
-                                            };
+                    {
+                        Index = endpoint.Index,
+                        IsDefault = endpoint.Default,
+                        Location = new Uri(baseUrl, endpoint.LocalPath).ToString(),
+                        Binding = GetBinding(endpoint.Binding, Saml20Constants.ProtocolBindings.HttpPost)
+                    };
                     signonServiceEndpoints.Add(loginEndpoint);
 
                     if (config.ServiceProvider.IncludeArtifactResolutionEndpoints)
                     {
                         var artifactSignonEndpoint = new IndexedEndpoint
-                                                         {
-                                                             Binding = Saml20Constants.ProtocolBindings.HttpSoap,
-                                                             Index = loginEndpoint.Index,
-                                                             Location = loginEndpoint.Location
-                                                         };
+                        {
+                            Binding = Saml20Constants.ProtocolBindings.HttpSoap,
+                            Index = loginEndpoint.Index,
+                            Location = loginEndpoint.Location
+                        };
                         artifactResolutionEndpoints.Add(artifactSignonEndpoint);
                     }
 
@@ -664,21 +509,23 @@ namespace SAMLSilly
 
                 if (endpoint.Type == EndpointType.Logout)
                 {
+                    var location = new Uri(baseUrl, endpoint.LocalPath).ToString();
                     var logoutEndpoint = new Endpoint
-                                             {
-                                                 Location = new Uri(baseUrl, endpoint.LocalPath).ToString()
-                                             };
-                    logoutEndpoint.ResponseLocation = logoutEndpoint.Location;
-                    logoutEndpoint.Binding = GetBinding(endpoint.Binding, Saml20Constants.ProtocolBindings.HttpPost);
+                    {
+                        Location = location,
+                        ResponseLocation = location,
+                        Binding = GetBinding(endpoint.Binding, Saml20Constants.ProtocolBindings.HttpPost)
+                    };
                     logoutServiceEndpoints.Add(logoutEndpoint);
+
                     if (config.ServiceProvider.IncludeArtifactResolutionEndpoints)
                     {
                         var artifactLogoutEndpoint = new IndexedEndpoint
-                                                         {
-                                                             Binding = Saml20Constants.ProtocolBindings.HttpSoap,
-                                                             Index = endpoint.Index,
-                                                             Location = logoutEndpoint.Location
-                                                         };
+                        {
+                            Binding = Saml20Constants.ProtocolBindings.HttpSoap,
+                            Index = endpoint.Index,
+                            Location = logoutEndpoint.Location
+                        };
                         artifactResolutionEndpoints.Add(artifactLogoutEndpoint);
                     }
                     continue;
@@ -702,15 +549,15 @@ namespace SAMLSilly
                 for (var i = 0; i < config.Metadata.RequestedAttributes.Count; i++)
                 {
                     attConsumingService.RequestedAttribute[i] = new RequestedAttribute
-                                                                    {
-                                                                        Name = config.Metadata.RequestedAttributes[i].Name
-                                                                    };
+                    {
+                        Name = config.Metadata.RequestedAttributes[i].Name,
+                        NameFormat = SamlAttribute.NameformatBasic
+                    };
+
                     if (config.Metadata.RequestedAttributes[i].IsRequired)
                     {
                         attConsumingService.RequestedAttribute[i].IsRequired = true;
                     }
-
-                    attConsumingService.RequestedAttribute[i].NameFormat = SamlAttribute.NameformatBasic;
                 }
             }
             else
@@ -736,19 +583,23 @@ namespace SAMLSilly
             keyEncryption.Use = KeyTypes.Encryption;
             keyEncryption.UseSpecified = true;
 
+            var keyinfo = new System.Security.Cryptography.Xml.KeyInfo();
+            var keyClause = new System.Security.Cryptography.Xml.KeyInfoX509Data(config.ServiceProvider.SigningCertificate, X509IncludeOption.EndCertOnly);
+            keyinfo.AddClause(keyClause);
+
             // Ugly conversion between the .Net framework classes and our classes ... avert your eyes!!
-            keySigning.KeyInfo = Serialization.DeserializeFromXmlString<Schema.XmlDSig.KeyInfo>(keyInfo.GetXml().OuterXml);
+            keySigning.KeyInfo = Serialization.DeserializeFromXmlString<Schema.XmlDSig.KeyInfo>(keyinfo.GetXml().OuterXml);
             keyEncryption.KeyInfo = keySigning.KeyInfo;
 
             // apply the <Organization> element
             if (config.Metadata.Organization != null)
             {
                 entity.Organization = new Schema.Metadata.Organization
-                                          {
-                                              OrganizationName = new[] { new LocalizedName { Value = config.Metadata.Organization.Name } },
-                                              OrganizationDisplayName = new[] { new LocalizedName { Value = config.Metadata.Organization.DisplayName } },
-                                              OrganizationURL = new[] { new LocalizedURI { Value = config.Metadata.Organization.Url } }
-                                          };
+                {
+                    OrganizationName = new[] { new LocalizedName { Value = config.Metadata.Organization.Name, Language = "en" } },
+                    OrganizationDisplayName = new[] { new LocalizedName { Value = config.Metadata.Organization.DisplayName, Language = "en" } },
+                    OrganizationURL = new[] { new LocalizedURI { Value = config.Metadata.Organization.Url, Language = "en" } }
+                };
             }
 
             if (config.Metadata.Contacts != null && config.Metadata.Contacts.Any())
@@ -774,13 +625,13 @@ namespace SAMLSilly
         {
             if (Entity != null)
             {
-                _ssoEndpoints = new List<IdentityProviderEndpoint>();
-                _idpSloEndpoints = new List<IdentityProviderEndpoint>();
-                _idpArsEndpoints = new Dictionary<int, IndexedEndpoint>();
-                _spSloEndpoints = new List<IdentityProviderEndpoint>();
-                _spArsEndpoints = new Dictionary<int, IndexedEndpoint>();
-                _assertionConsumerServiceEndpoints = new List<IdentityProviderEndpoint>();
-                _attributeQueryEndpoints = new List<Endpoint>();
+
+                SSOEndpoints = new List<IdentityProviderEndpoint>();
+                IDPArsEndpoints = new Dictionary<int, IndexedEndpoint>();
+                SPSLOEndpoints = new List<IdentityProviderEndpoint>();
+                //_spArsEndpoints = new Dictionary<int, IndexedEndpoint>();
+                AssertionConsumerServiceEndpoints = new List<IdentityProviderEndpoint>();
+                //_attributeQueryEndpoints = new List<Endpoint>();
 
                 foreach (var item in Entity.Items)
                 {
@@ -818,7 +669,7 @@ namespace SAMLSilly
                                     throw new InvalidOperationException("Binding not supported: " + endpoint.Binding);
                             }
 
-                            _ssoEndpoints.Add(new IdentityProviderEndpoint { Url = endpoint.Location, Binding = binding });
+                            SSOEndpoints.Add(new IdentityProviderEndpoint { Url = endpoint.Location, Binding = binding });
                         }
 
                         if (descriptor.SingleLogoutService != null)
@@ -848,7 +699,7 @@ namespace SAMLSilly
                                         throw new InvalidOperationException("Binding not supported: " + endpoint.Binding);
                                 }
 
-                                _idpSloEndpoints.Add(new IdentityProviderEndpoint { Url = endpoint.Location, Binding = binding });
+                                IDPSLOEndpoints.Add(new IdentityProviderEndpoint { Url = endpoint.Location, Binding = binding });
                             }
                         }
 
@@ -856,7 +707,7 @@ namespace SAMLSilly
                         {
                             foreach (var ie in descriptor.ArtifactResolutionService)
                             {
-                                _idpArsEndpoints.Add(ie.Index, ie);
+                                //_idpArsEndpoints.Add(ie.Index, ie);
                             }
                         }
                     }
@@ -889,7 +740,7 @@ namespace SAMLSilly
                                     throw new InvalidOperationException("Binding not supported: " + endpoint.Binding);
                             }
 
-                            _assertionConsumerServiceEndpoints.Add(new IdentityProviderEndpoint { Url = endpoint.Location, Binding = binding });
+                            AssertionConsumerServiceEndpoints.Add(new IdentityProviderEndpoint { Url = endpoint.Location, Binding = binding });
                         }
 
                         if (descriptor.SingleLogoutService != null)
@@ -919,7 +770,7 @@ namespace SAMLSilly
                                         throw new InvalidOperationException("Binding not supported: " + endpoint.Binding);
                                 }
 
-                                _spSloEndpoints.Add(new IdentityProviderEndpoint { Url = endpoint.Location, Binding = binding });
+                                SPSLOEndpoints.Add(new IdentityProviderEndpoint { Url = endpoint.Location, Binding = binding });
                             }
                         }
 
@@ -927,7 +778,7 @@ namespace SAMLSilly
                         {
                             foreach (var ie in descriptor.ArtifactResolutionService)
                             {
-                                _spArsEndpoints.Add(ie.Index, ie);
+                                //_spArsEndpoints.Add(ie.Index, ie);
                             }
                         }
                     }
@@ -935,7 +786,7 @@ namespace SAMLSilly
                     if (item is AttributeAuthorityDescriptor)
                     {
                         var aad = (AttributeAuthorityDescriptor)item;
-                        _attributeQueryEndpoints.AddRange(aad.AttributeService);
+                        //_attributeQueryEndpoints.AddRange(aad.AttributeService);
                     }
                 }
             }
@@ -946,15 +797,15 @@ namespace SAMLSilly
         /// </summary>
         private void ExtractKeyDescriptors()
         {
-            if (_keys != null || Entity == null)
+            if (Keys != null || Entity == null)
             {
                 return;
             }
 
-            _keys = new List<KeyDescriptor>();
+            Keys = new List<KeyDescriptor>();
             foreach (var keyDescriptor in Entity.Items.OfType<RoleDescriptor>().SelectMany(rd => rd.KeyDescriptor))
             {
-                _keys.Add(keyDescriptor);
+                Keys.Add(keyDescriptor);
             }
         }
 
@@ -965,12 +816,19 @@ namespace SAMLSilly
         private void ExtractKeyDescriptors(XmlDocument doc)
         {
             var list = doc.GetElementsByTagName(KeyDescriptor.ElementName, Saml20Constants.Metadata);
-            _keys = new List<KeyDescriptor>(list.Count);
+            Keys = new List<KeyDescriptor>(list.Count);
 
             foreach (XmlNode node in list)
             {
-                _keys.Add(Serialization.DeserializeFromXmlString<KeyDescriptor>(node.OuterXml));
+                Keys.Add(Serialization.DeserializeFromXmlString<KeyDescriptor>(node.OuterXml));
             }
+        }
+
+
+        public Saml20MetadataDocument Load(Saml2Configuration config)
+        {
+            ConvertToMetadata(config);
+            return this;
         }
     }
 }

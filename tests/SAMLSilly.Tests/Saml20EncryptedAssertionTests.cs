@@ -25,6 +25,7 @@ namespace SAMLSilly.Tests
         /// - Decrypt the assertion and verify that it uses the correct algorithm.
         /// - Verify that the SessionKeyAlgorithm property behaves as expected.
         /// </summary>
+        //TODO: @ebyte this fails sometimes
         [Fact]
         public void CanEncryptAssertionFull()
         {

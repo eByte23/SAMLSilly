@@ -1,176 +1,107 @@
 using System;
-using System.Security.Cryptography.Xml;
-using System.Xml;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.IO;
+using SAMLSilly.Config;
 using Xunit;
-using SAMLSilly.Utils;
-using SAMLSilly.Schema.Metadata;
 
 namespace SAMLSilly.Tests
 {
-    /// <summary>
-    /// <see cref="Saml20MetadataDocument"/> tests.
-    /// </summary>
-
     public class Saml20MetadataDocumentTests
     {
-        /// <summary>
-        /// Constructor tests.
-        /// </summary>
+        //These are to fix our api and make it not shit
 
-        public class ConstructorMethod
+        [Fact]
+        public void Serialize_metadata_to_xml_empty_constructor_should_throw_exception()
         {
-            /// <summary>
-            /// Verify that certificates can be extracted.
-            /// </summary>
-            [Fact]
-            public void CanExtractCertificates()
-            {
-                // Arrange
-                var doc = new XmlDocument { PreserveWhitespace = true };
-                doc.Load(@"Protocol\MetadataDocs\metadata-ADLER.xml");
 
-                // Act
-                var metadata = new Saml20MetadataDocument(doc);
-                var certificateCheckResult = XmlSignatureUtils.CheckSignature(doc, (KeyInfo)metadata.Keys[0].KeyInfo);
+            var metadata = new Saml20MetadataDocument();
 
-                // Assert
-                Assert.True(metadata.GetKeys(KeyTypes.Signing).Count == 1);
-                Assert.True(metadata.GetKeys(KeyTypes.Encryption).Count == 1);
-                Assert.True(metadata.Keys[0].Use == KeyTypes.Signing);
-                Assert.True(metadata.Keys[1].Use == KeyTypes.Encryption);
-
-                // The two certs in the metadata document happen to be identical, and are also
-                // used for signing the entire document.
-                // Extract the certificate and verify the document.
-                Assert.True(certificateCheckResult);
-                Assert.Equal("ADLER_SAML20_ID", metadata.EntityId);
-            }
-
-            /// <summary>
-            /// Verify that certificates can be extracted.
-            /// </summary>
-            [Fact]
-            public void CanExtractCertificatesOnStream()
-            {
-                Saml20MetadataDocument metadata;
-                // Arrange
-                using (var ms = new MemoryStream())
-                {
-                    using (var reader = File.OpenText(@"Protocol\MetadataDocs\metadata-ADLER.xml"))
-                    {
-                        reader.BaseStream.CopyTo(ms);
-                        reader.Close();
-                    }
-                    ms.Seek(0, SeekOrigin.Begin);
-                    metadata = new Saml20MetadataDocument(ms, null);
-                }
-
-                // Assert
-                Assert.True(metadata.GetKeys(KeyTypes.Signing).Count == 1);
-                Assert.True(metadata.GetKeys(KeyTypes.Encryption).Count == 1);
-                Assert.True(metadata.Keys[0].Use == KeyTypes.Signing);
-                Assert.True(metadata.Keys[1].Use == KeyTypes.Encryption);
-
-                Assert.Equal("ADLER_SAML20_ID", metadata.EntityId);
-            }
-
-            /// <summary>
-            /// Verify that IDP endpoints can be extracted.
-            /// </summary>
-            [Fact]
-            public void CanExtractEndpoints()
-            {
-                // Arrange
-                var doc = new XmlDocument { PreserveWhitespace = true };
-                doc.Load(@"Protocol\MetadataDocs\metadata-ADLER.xml");
-
-                // Act
-                var metadata = new Saml20MetadataDocument(doc);
-
-                // Assert
-                Assert.Equal(2, metadata.IDPSLOEndpoints.Count);
-                Assert.Equal(2, metadata.SSOEndpoints.Count);
-            }
-        }
-
-        /// <summary>
-        /// ToXml method tests.
-        /// </summary>
-
-        public class ToXmlMethod
-        {
-            /// <summary>
-            /// Sign an &lt;EntityDescriptor&gt; metadata element.
-            /// </summary>
-            /// <remakrs>
-            /// This requires that the configured signing certificate for tests is in the local store!
-            /// </remakrs>
-            [Fact]
-            public void SignsXml()
-            {
-                // Arrange
-                var doc = new Saml20MetadataDocument(true);
-                var entity = doc.CreateDefaultEntity();
-                entity.ValidUntil = DateTime.Now.AddDays(14);
-
-                var certificate = new X509Certificate2(FileEmbeddedResource("SAMLSilly.Tests.Certificates.sts_dev_certificate.pfx"), "test1234");
-                // Act
-                var metadata = doc.ToXml(null, certificate);
-                var document = new XmlDocument { PreserveWhitespace = true };
-                document.LoadXml(metadata);
-                var result = XmlSignatureUtils.CheckSignature(document);
-
-                // Assert
-                Assert.True(result);
-            }
-
-            private byte[] FileEmbeddedResource(string path)
-            {
-                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-                var resourceName = path;
-
-                byte[] result = null;
-                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-                using (var memoryStream = new MemoryStream())
-                {
-                    stream.CopyTo(memoryStream);
-                    result = memoryStream.ToArray();
-                }
-                return result;
-            }
+            Assert.Throws<System.InvalidOperationException>(() => metadata.ToXml());
         }
 
 
-        public class LoadingMetadata
+        [Fact]
+        public void Serialize_metatdata_from_configuration_not_signed()
         {
-            [Fact]
-            public void LoadMetadataFromUrl()
+            var config = new Saml2Configuration()
             {
-                var doc = new XmlDocument { PreserveWhitespace = true };
-                doc.Load(@"https://sts.newcrest.com.au/federationmetadata/2007-06/federationmetadata.xml");
 
-                // Act
-                var metadata = new Saml20MetadataDocument(doc);
+                AllowedAudienceUris = new System.Collections.Generic.List<Uri>(),
+                IdentityProviders = new IdentityProviders(),
+                ServiceProvider = new ServiceProvider
+                {
+                    Id = "secure.inlogik.com",
+                    Server = "https://secure.inlogik.com",
+                    SigningCertificate = new X509Certificate2(@"Certificates\SafewhereTest_SFS.pfx", "test1234"),
 
-                // Assert
-                Assert.Equal(2, metadata.IDPSLOEndpoints.Count);
-                Assert.Equal(2, metadata.SSOEndpoints.Count);
-            }
+                },
 
-            [Fact(Skip ="TODO: @ebyte23 come back and make a valid test")]
-            public void TestMetadataloadWithNoUseTypeSigning()
+            };
+            config.ServiceProvider.IncludeArtifactResolutionEndpoints = false;
+            config.ServiceProvider.AuthNAllowCreate = true;
+            config.ServiceProvider.UseValidUntil = false;
+            config.ServiceProvider.NameIdFormats = new NameIdFormats()
             {
-                var doc = new XmlDocument { PreserveWhitespace = true };
-                doc.Load(@"Protocol\MetadataDocs\rmit-metadata.xml");
 
-                // Act
-                var metadata = new Saml20MetadataDocument(doc);
-                //var l  = XmlSignatureUtils.CheckSignature(doc);
-                //var a = "";
-            }
+            };
 
+            config.ServiceProvider.NameIdFormats.AddRange(new[]
+            {
+                new NameIdFormat { Format = "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" },
+                new NameIdFormat { Format = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient" }
+            });
+
+
+            config.AllowedAudienceUris.Add(new Uri("https://saml.safewhere.net"));
+            config.IdentityProviders.AddByMetadataDirectory(@"Protocol\MetadataDocs\FOBS"); // Set it manually.
+
+            var metadata = new Saml20MetadataDocument().Load(config);
+
+            Assert.NotEmpty(metadata.ToXml());
+        }
+
+        [Fact]
+        public void Serialize_metadata_from_configuration_signed()
+        {
+
+            var config = new Saml2Configuration()
+            {
+
+                AllowedAudienceUris = new System.Collections.Generic.List<Uri>(),
+                IdentityProviders = new IdentityProviders(),
+                ServiceProvider = new ServiceProvider
+                {
+                    Id = "secure.inlogik.com",
+                    Server = "https://secure.inlogik.com",
+                    SigningCertificate = new X509Certificate2(@"Certificates\SafewhereTest_SFS.pfx", "test1234"),
+
+                },
+
+            };
+            config.ServiceProvider.IncludeArtifactResolutionEndpoints = false;
+            config.ServiceProvider.AuthNAllowCreate = true;
+            config.ServiceProvider.UseValidUntil = false;
+            config.ServiceProvider.NameIdFormats = new NameIdFormats()
+            {
+
+            };
+
+            config.ServiceProvider.NameIdFormats.AddRange(new[]
+            {
+                new NameIdFormat { Format = "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" },
+                new NameIdFormat { Format = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient" }
+            });
+
+
+            config.AllowedAudienceUris.Add(new Uri("https://saml.safewhere.net"));
+            config.IdentityProviders.AddByMetadataDirectory(@"Protocol\MetadataDocs\FOBS"); // Set it manually.
+
+            var cert = new X509Certificate2(@"Certificates\SafewhereTest_SFS.pfx", "test1234");
+            //var encryptedAssertion = new Saml20EncryptedAssertion((RSA)cert.PrivateKey);
+
+            var metadata = new Saml20MetadataDocument().Load(config);
+
+            Assert.NotEmpty(metadata.ToXml(null, config.ServiceProvider.SigningCertificate));
         }
     }
 }

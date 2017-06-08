@@ -253,7 +253,7 @@ namespace SAMLSilly.Utils
         /// <param name="id">The id of the topmost element in the XmlDocument</param>
         public static void SignDocument(XmlDocument doc, string id, Saml2Configuration config)
         {
-            SignDocument(doc, id, config.ServiceProvider.SigningCertificate, config);
+            SignDocument(doc, id, config.ServiceProvider.SigningCertificate, config.SigningAlgorithm);
         }
 
         /// <summary>
@@ -262,9 +262,9 @@ namespace SAMLSilly.Utils
         /// <param name="doc">The XmlDocument to be signed</param>
         /// <param name="id">The id of the topmost element in the XmlDocument</param>
         /// <param name="cert">The certificate used to sign the document</param>
-        public static void SignDocument(XmlDocument doc, string id, X509Certificate2 cert, Saml2Configuration samlConfiguration)
+        public static void SignDocument(XmlDocument doc, string id, X509Certificate2 cert, AlgorithmType signatureAlgorithm)
         {
-            var signedXml = SetupSignedDocWithSignatureType(doc, cert, samlConfiguration);
+            var signedXml = SetupSignedDocWithSignatureType(doc, cert, signatureAlgorithm);
 
             // Retrieve the value of the "ID" attribute on the root assertion element.
             var reference = new Reference("#" + id);
@@ -293,14 +293,14 @@ namespace SAMLSilly.Utils
             }
         }
 
-        private static SignedXml SetupSignedDocWithSignatureType(XmlDocument doc, X509Certificate2 cert, Saml2Configuration samlConfiguration)
+        private static SignedXml SetupSignedDocWithSignatureType(XmlDocument doc, X509Certificate2 cert, AlgorithmType signatureAlgorithm)
         {
+            SetupSHA256();
+
             var signedXml = new SignedXml(doc);
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
-            if (samlConfiguration.SigningAlgorithm == AlgorithmType.SHA256)
+            if (signatureAlgorithm == AlgorithmType.SHA256)
             {
-                //SetupSHA256();
-
                 var exportedKeyMaterial = cert.PrivateKey.ToXmlString( /* includePrivateParameters = */ true);
 
                 var cspParameters = new CspParameters(24 /* PROV_RSA_AES */);
@@ -311,7 +311,7 @@ namespace SAMLSilly.Utils
                 signedXml.SignedInfo.SignatureMethod = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
                 signedXml.SigningKey = key;
             }
-            else if (samlConfiguration.SigningAlgorithm == AlgorithmType.SHA1)
+            else if (signatureAlgorithm == AlgorithmType.SHA1)
             {
                 signedXml.SigningKey = cert.PrivateKey;
             }
@@ -433,7 +433,7 @@ namespace SAMLSilly.Utils
             // an exception will be raised if an SHA256 signature method is attempted to be used.
             if (signedXml.SignatureMethod.Contains("rsa-sha256"))
             {
-                //SetupSHA256();
+                SetupSHA256();
             }
 
             // verify that the inlined signature has a valid reference uri
@@ -441,38 +441,58 @@ namespace SAMLSilly.Utils
 
             return signedXml;
         }
+        public static XmlDocument GenericSign(XmlDocument doc, string id, X509Certificate2 certificate, Action<XmlDocument, XmlElement> appendSignatureToDocument, AlgorithmType signatureAlgorithm)
+        {
+            var signedXml = SetupSignedDocWithSignatureType(doc, certificate, signatureAlgorithm);
+            signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
 
-//        public static void SetupSHA256()
-//        {
-//            var addAlgorithmMethod = typeof(CryptoConfig).GetMethod("AddAlgorithm", BindingFlags.Public | BindingFlags.Static);
-//            if (addAlgorithmMethod == null)
-//            {
-//                var ob1 = CryptoConfig.CreateFromName("SHA256");
-//                AddAlgorithm("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", typeof(RSAPKCS1SHA256SignatureDescription));               
-//            }
-//            else
-//            {
-//                addAlgorithmMethod.Invoke(null, new object[] { typeof(RSAPKCS1SHA256SignatureDescription), new[] { "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" } });
-//            }
-//        }
 
-//        private static void AddAlgorithm(String key, object value)
-//        {
-//#if Version_4
-//                var defaultNameHT =
-//                typeof(CryptoConfig).GetField("defaultNameHT", BindingFlags.Static | BindingFlags.NonPublic)
-//                .GetValue(null) as Dictionary;
-//#endif
+            var reference = new Reference($"#{id}");
+            reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
+            reference.AddTransform(new XmlDsigExcC14NTransform());
 
-//            var defaultNameHT =
-//            typeof(CryptoConfig).GetProperty("DefaultNameHT", BindingFlags.Static | BindingFlags.NonPublic)
-//                .GetValue(null, null) as System.Collections.Hashtable;
+            signedXml.AddReference(reference);
+            signedXml.KeyInfo = new KeyInfo();
+            signedXml.KeyInfo.AddClause(new KeyInfoX509Data(certificate, X509IncludeOption.EndCertOnly));
 
-//            if (!defaultNameHT.ContainsKey(key))
-//            {
-//                defaultNameHT.Add(key, value);
-//            }
-//        }
+            signedXml.ComputeSignature();
+
+            appendSignatureToDocument(doc, signedXml.GetXml());
+
+            return doc;
+        }
+
+        public static void SetupSHA256()
+        {
+            var addAlgorithmMethod = typeof(CryptoConfig).GetMethod("AddAlgorithm", BindingFlags.Public | BindingFlags.Static);
+            if (addAlgorithmMethod == null)
+            {
+                var ob1 = CryptoConfig.CreateFromName("SHA256");
+                AddAlgorithm("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", typeof(RSAPKCS1SHA256SignatureDescription));
+            }
+            else
+            {
+                addAlgorithmMethod.Invoke(null, new object[] { typeof(RSAPKCS1SHA256SignatureDescription), new[] { "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" } });
+            }
+        }
+
+        private static void AddAlgorithm(String key, object value)
+        {
+#if Version_4
+                       var defaultNameHT =
+                       typeof(CryptoConfig).GetField("defaultNameHT", BindingFlags.Static | BindingFlags.NonPublic)
+                       .GetValue(null) as Dictionary;
+#endif
+
+            var defaultNameHT =
+            typeof(CryptoConfig).GetProperty("DefaultNameHT", BindingFlags.Static | BindingFlags.NonPublic)
+                .GetValue(null, null) as System.Collections.Hashtable;
+
+            if (!defaultNameHT.ContainsKey(key))
+            {
+                defaultNameHT.Add(key, value);
+            }
+        }
 
         /// <summary>
         /// Verifies that the reference uri (if any) points to the correct element.

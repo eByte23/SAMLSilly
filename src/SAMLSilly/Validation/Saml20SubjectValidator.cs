@@ -1,6 +1,7 @@
 using System;
 using SAMLSilly.Schema.Core;
 using SAMLSilly.Schema.Protocol;
+using System.Linq;
 
 namespace SAMLSilly.Validation
 {
@@ -25,40 +26,34 @@ namespace SAMLSilly.Validation
         /// <param name="subject">The subject.</param>
         public virtual void ValidateSubject(Subject subject)
         {
-            if (subject == null)
-            {
-                throw new ArgumentNullException("subject");
-            }
+            if (subject == null)            
+                throw new ArgumentNullException("subject");            
 
             var validContentFound = false;
-            if (subject.Items == null || subject.Items.Length == 0)
-            {
-                throw new Saml20FormatException("Subject MUST contain either an identifier or a subject confirmation");
-            }
+            if (subject.Items == null || !subject.Items.Any())            
+                throw new Saml20FormatException("Subject MUST contain either an identifier or a subject confirmation");            
 
-            foreach (var o in subject.Items)
+            foreach (var item in subject.Items)
             {
-                if (o is NameId)
+                if (item is NameId)
                 {
                     validContentFound = true;
-                    _nameIdValidator.ValidateNameId((NameId)o);
+                    _nameIdValidator.ValidateNameId((NameId)item);
                 }
-                else if (o is EncryptedElement)
+                else if (item is EncryptedElement)
                 {
                     validContentFound = true;
-                    _nameIdValidator.ValidateEncryptedId((EncryptedElement)o);
+                    _nameIdValidator.ValidateEncryptedId((EncryptedElement)item);
                 }
-                else if (o is SubjectConfirmation)
+                else if (item is SubjectConfirmation)
                 {
                     validContentFound = true;
-                    _subjectConfirmationValidator.ValidateSubjectConfirmation((SubjectConfirmation)o);
+                    _subjectConfirmationValidator.ValidateSubjectConfirmation((SubjectConfirmation)item);
                 }
             }
 
-            if (!validContentFound)
-            {
-                throw new Saml20FormatException("Subject must have either NameID, EncryptedID or SubjectConfirmation subelement.");
-            }
+            if (!validContentFound)            
+                throw new Saml20FormatException("Subject must have either NameID, EncryptedID or SubjectConfirmation subelement.");            
         }
     }
 }

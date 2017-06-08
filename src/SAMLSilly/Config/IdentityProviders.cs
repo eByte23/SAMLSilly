@@ -120,9 +120,10 @@ namespace SAMLSilly.Config
         {
             try
             {
-                var metadataDoc = new Saml20MetadataDocument(file, GetEncodings());
-                AdjustIdpListWithNewMetadata(metadataDoc);
-                return true;
+                //var metadataDoc = new Saml20MetadataDocument(file, GetEncodings());
+                //AdjustIdpListWithNewMetadata(metadataDoc);
+                //return true;
+                return false;
             }
             catch (Exception)
             {

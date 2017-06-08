@@ -23,5 +23,7 @@ namespace SAMLSilly.Config
         /// </summary>
         /// <value>The URL.</value>
         public string Url { get; set; }
+
+        public string Lang { get; set; }
     }
 }

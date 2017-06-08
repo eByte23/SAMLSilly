@@ -27,15 +27,22 @@ namespace SAMLSilly.Tests
             };
 
             _config.IdentityProviders = new IdentityProviders();
-            _config.SigningAlgorithm = AlgorithmType.SHA1;
+
+            _config.SigningAlgorithm = AlgorithmType.SHA256;
             _config.ServiceProvider.IncludeArtifactResolutionEndpoints = false;
             _config.ServiceProvider.AuthNAllowCreate = true;
             _config.ServiceProvider.UseValidUntil = false;
+            _config.ServiceProvider.RequiredNameIdFormat = new NameIdFormat { Format = "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" };
+
             _config.ServiceProvider.NameIdFormats = new NameIdFormats()
             {
                 new NameIdFormat { Format = "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" },
                 new NameIdFormat { Format = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient" }
             };
+
+            _config.ServiceProvider.Endpoints.Add(new ServiceProviderEndpoint(EndpointType.SignOn, "/auth/saml2", "", BindingType.Redirect, true));
+            _config.ServiceProvider.Endpoints.Add(new ServiceProviderEndpoint(EndpointType.SignOn, "/auth/saml2", "", BindingType.Post, false));
+
 
             _config.IdentityProviders.AddByMetadataDirectory(@"Protocol\MetadataDocs\FOBS"); // Set it manually.
 

@@ -186,10 +186,10 @@ namespace SAMLSilly.AspNetCore
         private Saml20AuthnRequest CreateAuthNRequest(Saml2Configuration config)
         {
             var authnRequest = Saml20AuthnRequest.GetDefault(config);
-            //var requestXml = authnRequest.GetXml();
-            //if(config.ServiceProvider.AuthNRequestsSigned){
-            //XmlSignatureUtils.SignDocument(requestXml, authnRequest.Id, config);
-            //}
+            var requestXml = authnRequest.GetXml();
+            if(config.ServiceProvider.AuthNRequestsSigned) {
+                XmlSignatureUtils.SignDocument(requestXml, authnRequest.Id, config);
+            }
 
             return authnRequest;
         }

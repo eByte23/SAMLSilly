@@ -175,7 +175,7 @@ namespace SAMLSilly.Tests.Bindings
                 // Arrange
                 var url = new Uri("http://haiku.safewhere.local/Saml20TestWeb/SSOLogout.saml2.aspx?SAMLResponse=fZFRa8IwEMe%2FSsm7bZq2qMEWZN1DwSEY0eGLpGmqZTUpuYTpt19bGVMYPob7%2FX%2BXu1sAv7QdXemTdnYjodMKpJdLsI3ittEqRWdrOxoEZ958OR94Lb%2FP0ki%2F1YK3AevjBG97fi%2FLgLH13eQPWuJz6K7IK9SveKtT1FQ1qYSoSSRIVMVhPJ3hpMQRj6IwKUVcJn0CwMlCgeXKpohgPJvgaILjbUhoQmg49cl8dui5PEWH%2BoaB6P2arAtlq%2FqWF%2FNTXn8y3yBvJw2MQxAfI%2B96aRXQceIUOaOo5tAAVfwigVpB2fJjRXuSdkZbLXSLssVA0%2FE%2F5iH%2FOs4BpBmWh7JlvnrfHIcKwcciXwQPvru8o8xy6%2BD59aYr6e146%2BTrVjDSlDkhJAAKsnuHP2nw34GzHw%3D%3D&SigAlg=http%3A%2F%2Fwww.w3.org%2F2000%2F09%2Fxmldsig%23rsa-sha1&Signature=UoYGLeSCYOSvjIaBpTcgtq2O0Nbz%2BVk%2BaaLESje8%2FZKxGNmWrFXJjSPrA403J23NeQzbxxVgOwSP8idIM95BhlVwxpiG%2B7%2FhJyNNrjGPohmD3cQpBWoWqZ8IEudDc%2FwDCshPb6wTdr6%2FOdKXQ2uwSK5NA2LYI8AAN5sq9kPtVvk%3D");
                 var parser = new HttpRedirectBindingParser(url);
-                var cert = new X509Certificate2(@"Certificates\pingcertificate.crt");
+                var cert = new X509Certificate2(@"Certificates\pingcertificate.crt", "", X509KeyStorageFlags.Exportable | X509KeyStorageFlags.MachineKeySet);
 
                 // Act
                 var result = parser.CheckSignature(cert.PublicKey.Key);

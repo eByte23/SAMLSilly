@@ -8,7 +8,7 @@
     "tasks": [
         {
             "taskName": "build",
-            "args": [ "${workspaceRoot}\\src\\SAMLSilly.sln" ],
+            "args": [ "${workspaceRoot}\\SAMLSilly.sln" ],
             "isBuildCommand": true,
             "showOutput": "silent",
             "problemMatcher": "$msCompile"

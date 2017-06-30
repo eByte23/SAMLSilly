@@ -461,11 +461,11 @@ namespace SAMLSilly.Utils
             if (addAlgorithmMethod == null)
             {
                 var ob1 = CryptoConfig.CreateFromName("SHA256");
-                AddAlgorithm("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", typeof(RSAPKCS1SHA256SignatureDescription));
+                AddAlgorithm(SAMLConstants.XmlDsigRSASHA256Url, typeof(RSAPKCS1SHA256SignatureDescription));
             }
             else
             {
-                addAlgorithmMethod.Invoke(null, new object[] { typeof(RSAPKCS1SHA256SignatureDescription), new[] { "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" } });
+                addAlgorithmMethod.Invoke(null, new object[] { typeof(RSAPKCS1SHA256SignatureDescription), new[] { SAMLConstants.XmlDsigRSASHA256Url } });
             }
         }
 
@@ -517,7 +517,7 @@ namespace SAMLSilly.Utils
 
                 if (uri.Length < 2 || !id.Equals(uri.Substring(1)))
                 {
-                    throw new InvalidOperationException("Rererence URI = '" + uri.Substring(1) + "' does not match expected id = '" + id + "'");
+                    throw new InvalidOperationException("Reference URI = '" + uri.Substring(1) + "' does not match expected id = '" + id + "'");
                 }
             }
         }

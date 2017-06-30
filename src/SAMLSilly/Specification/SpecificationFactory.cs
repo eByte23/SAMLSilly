@@ -19,26 +19,17 @@ namespace SAMLSilly.Specification
         public static List<ICertificateSpecification> GetCertificateSpecifications(IdentityProvider endpoint)
         {
             var specs = new List<ICertificateSpecification>();
-            if (endpoint.CertificateValidationTypes?.Count > 0)
+
+            if (!endpoint.CertificateValidationTypes?.Any() ?? true)
             {
-                foreach (var elem in endpoint.CertificateValidationTypes)
-                {
-                    try
-                    {
-                        var val = (ICertificateSpecification)Activator.CreateInstance(Type.GetType(elem));
-                        specs.Add(val);
-                    }
-                    catch (Exception e)
-                    {
-                       //we should log here
-                    }
-                }
+                specs.Add((ICertificateSpecification)Activator.CreateInstance(typeof(DefaultCertificateSpecification)));
+                return specs;
             }
 
-            if (specs.Count == 0)
+            foreach (var elem in endpoint.CertificateValidationTypes)
             {
-                // Add default specification
-                specs.Add((ICertificateSpecification)Activator.CreateInstance(typeof(DefaultCertificateSpecification)));
+                var val = (ICertificateSpecification)Activator.CreateInstance(Type.GetType(elem));
+                specs.Add(val);
             }
 
             return specs;

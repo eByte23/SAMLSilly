@@ -68,20 +68,20 @@ namespace SAMLSilly.Bindings
 
             var property = new HttpRequestMessageProperty { Method = "POST" };
             property.Headers.Add(HttpRequestHeader.ContentType, "text/xml; charset=utf-8");
-            
+
             if (auth != null && auth.Credentials != null)
             {
                 // Basic http auth over ssl
                 var basicAuthzHeader = "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(auth.Credentials.Username + ":" + auth.Credentials.Password));
                 property.Headers.Add(HttpRequestHeader.Authorization, basicAuthzHeader);
             }
-            
+
             request.Properties.Add(HttpRequestMessageProperty.Name, property);
             if (relayState != null)
             {
                 request.Properties.Add("relayState", relayState);
-            }          
-  
+            }
+
             var epa = new EndpointAddress(endpoint);
 
             var factory = new ChannelFactory<IRequestChannel>(binding, epa);
@@ -92,7 +92,7 @@ namespace SAMLSilly.Bindings
             }
 
             var reqChannel = factory.CreateChannel();
-            
+
             reqChannel.Open();
             var response = reqChannel.Request(request);
             Console.WriteLine(response);

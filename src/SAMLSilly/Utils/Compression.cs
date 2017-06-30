@@ -19,7 +19,7 @@ namespace SAMLSilly.Utils
 
             var result = new StringBuilder();
             using (var stream = new DeflateStream(new MemoryStream(encoded), CompressionMode.Decompress))
-            using (var testStream = new StreamReader(new BufferedStream(stream), Encoding.UTF8))
+            using (var testStream = new StreamReader(new BufferedStream(stream), new UTF8Encoding(false)))
             {
                 // It seems we need to "peek" on the StreamReader to get it started. If we don't do this, the first call to
                 // ReadToEnd() will return string.empty.

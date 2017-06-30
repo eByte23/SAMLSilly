@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net461</TargetFramework>
+        <TargetFramework>netcoreapp2.0</TargetFramework>
         <DebugType>portable</DebugType>
         <AssemblyName>SAMLSilly.Tests</AssemblyName>
         <PackageId>SAMLSilly.Tests</PackageId>
@@ -21,16 +21,6 @@
         <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     </PropertyGroup>
     <ItemGroup>
-        <Reference Include="System" />
-        <Reference Include="System.Configuration" />
-        <Reference Include="System.Core" />
-        <Reference Include="System.Security" />
-        <Reference Include="System.Web" />
-        <Reference Include="System.Xml.Linq" />
-        <Reference Include="System.Data.DataSetExtensions" />
-        <Reference Include="Microsoft.CSharp" />
-        <Reference Include="System.Data" />
-        <Reference Include="System.Xml" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-*" />
         <PackageReference Include="xunit" Version="2.2.0" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />

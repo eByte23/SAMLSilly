@@ -277,7 +277,7 @@ namespace SAMLSilly.Utils
                         parentNode.InsertAfter(appDoc.ImportNode(sigElem, true), nodes[0]);
                     }
                 }
-            },signatureAlgorithm);
+            }, signatureAlgorithm);
         }
 
         private static SignedXml SetupSignedDocWithSignatureType(XmlDocument doc, X509Certificate2 cert, AlgorithmType signatureAlgorithm)
@@ -297,6 +297,7 @@ namespace SAMLSilly.Utils
                 key.FromXmlString(exportedKeyMaterial);
 
                 signedXml.SignedInfo.SignatureMethod = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+
                 signedXml.SigningKey = key;
             }
             else if (signatureAlgorithm == AlgorithmType.SHA1)
@@ -434,10 +435,14 @@ namespace SAMLSilly.Utils
             var signedXml = SetupSignedDocWithSignatureType(doc, certificate, signatureAlgorithm);
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
 
+            Reference reference = new Reference();
+            reference.Uri = "";
 
-            var reference = new Reference($"#{id}");
             reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
             reference.AddTransform(new XmlDsigExcC14NTransform());
+            reference.DigestMethod = "http://www.w3.org/2001/04/xmlenc#sha256";
+            reference.Id = $"#{id}";
+
 
             signedXml.AddReference(reference);
             signedXml.KeyInfo = new KeyInfo();

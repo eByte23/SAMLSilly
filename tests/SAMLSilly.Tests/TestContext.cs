@@ -1,6 +1,7 @@
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using SAMLSilly.Config;
+using Xunit.Abstractions;
 
 namespace SAMLSilly.Tests
 {
@@ -13,7 +14,7 @@ namespace SAMLSilly.Tests
 
         public TestContext()
         {
-            _devCertSign = Certificates.InMemoryResourceUtility.GetInMemoryCertificate("sts_dev_certificate.pfx", "test1234");
+                _devCertSign = Certificates.InMemoryResourceUtility.GetInMemoryCertificate("sts_dev_certificate.pfx", "test1234");
             _safewhereTest_SFS = Certificates.InMemoryResourceUtility.GetInMemoryCertificate("SafewhereTest_SFS.pfx", "test1234");
 
             _config = TestConfiguration.Configuration;

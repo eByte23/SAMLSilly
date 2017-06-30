@@ -11,26 +11,14 @@ namespace SAMLSilly.Specification
     /// </summary>
     public class DefaultCertificateSpecification : ICertificateSpecification
     {
-        public bool IsSatisfiedBy(X509Certificate2 certificate, ILogger logger)
+        public bool IsSatisfiedBy(X509Certificate2 certificate)
         {
             var useMachineContext = false;
-            var chainPolicy = new X509ChainPolicy { RevocationMode = X509RevocationMode.NoCheck };
-            var defaultCertificateValidator = X509CertificateValidator.CreateChainTrustValidator(useMachineContext, chainPolicy);
 
-            try
-            {
-                defaultCertificateValidator.Validate(certificate);
-                return true;
-            }
-            catch (Exception e)
-            {
-                if (logger != null)
-                {
-                    logger.LogWarning(string.Format(ErrorMessages.CertificateIsNotRFC3280Valid, certificate.SubjectName.Name, certificate.Thumbprint), e);
-                }
-            }
+            X509Chain ch = new X509Chain(useMachineContext);
+            ch.ChainPolicy = new X509ChainPolicy { RevocationMode = X509RevocationMode.NoCheck };
 
-            return false;
+            return ch.Build(certificate);
         }
     }
 }

@@ -15,6 +15,6 @@ namespace SAMLSilly.Specification
         /// <returns>
         /// <c>true</c> if valid; otherwise, <c>false</c>.
         /// </returns>
-        bool IsSatisfiedBy(X509Certificate2 certificate, ILogger logger);
+        bool IsSatisfiedBy(X509Certificate2 certificate);
     }
 }

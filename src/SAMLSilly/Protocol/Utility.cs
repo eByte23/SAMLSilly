@@ -59,8 +59,9 @@ namespace SAMLSilly.Protocol
                     var cert = new X509Certificate2((byte[])((X509Data)clause).Items.First());
                     var keyInfo = new KeyInfoX509Data(cert, X509IncludeOption.WholeChain);
 
+                    //TODO: @eByte23: this was old it we must check if there is actually a valid scenario for this
                     //var cert = XmlSignatureUtils.GetCertificateFromKeyInfo((KeyInfoX509Data)clause2);
-                    if (!CertificateSatisfiesSpecifications(identityProvider, cert))
+                    if (!CertificateSatisfiesSpecifications(identityProvider, cert, _logger))
                     {
                         continue;
                     }
@@ -82,9 +83,19 @@ namespace SAMLSilly.Protocol
         /// <param name="idp">The identity provider.</param>
         /// <param name="cert">The cert.</param>
         /// <returns><c>true</c> if certificate is satisfied by all specifications; otherwise, <c>false</c>.</returns>
-        private static bool CertificateSatisfiesSpecifications(IdentityProvider idp, X509Certificate2 cert)
+        private static bool CertificateSatisfiesSpecifications(IdentityProvider idp, X509Certificate2 cert, ILogger logger)
         {
-            return SpecificationFactory.GetCertificateSpecifications(idp).All(spec => spec.IsSatisfiedBy(cert, null));
+            return SpecificationFactory.GetCertificateSpecifications(idp).All(spec =>
+            {
+
+                bool isValid = spec.IsSatisfiedBy(cert);
+                if (!isValid)
+                {
+                    logger.LogWarning(ErrorMessages.CertificateIsNotRFC3280Valid, cert.SubjectName.Name, cert.Thumbprint);
+                }
+
+                return isValid;
+            });
         }
 
         /// <summary>

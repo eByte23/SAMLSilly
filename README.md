@@ -1,10 +1,12 @@
 # SAMLSilly
 
-### Build Statuses
-[![Build status](https://ci.appveyor.com/api/projects/status/m8its6r2l4p0v1rh/branch/master?svg=true)](https://ci.appveyor.com/project/eByte23/samlsilly/branch/master)
-[![Build status](https://ci.appveyor.com/api/projects/status/m8its6r2l4p0v1rh/branch/dev?svg=true)](https://ci.appveyor.com/project/eByte23/samlsilly/branch/dev)
+## What is SAMLSilly
+SAMLSilly is a SAML2.0 implementation for .net and .net core (coming soon). This library was forked form [elerch/SAML2](https://github.com/elerch/SAML2) original to [eByte23/SAML2.DotNet35](https://github.com/eByte23/SAML2.DotNet35) to make it run on .net 35 and to make some large changes to the way it handles ADFS (Active Directory Federation Services). The code has diverged past the point of a merge back thus this repository.
 
-SAMLSilly is a fork of SAML2/SAML2.DotNet35. The need for this fork came a from a need for more stable code base and support for a larger variety of IDP's
+### Build Statuses:
+master | dev | vnext
+-------|-----| ------
+[![Build status](https://ci.appveyor.com/api/projects/status/m8its6r2l4p0v1rh/branch/master?svg=true)](https://ci.appveyor.com/project/eByte23/samlsilly/branch/master) | [![Build status](https://ci.appveyor.com/api/projects/status/m8its6r2l4p0v1rh/branch/dev?svg=true)](https://ci.appveyor.com/project/eByte23/samlsilly/branch/dev)| [![Build status](https://ci.appveyor.com/api/projects/status/m8its6r2l4p0v1rh/branch/vnext?svg=true)](https://ci.appveyor.com/project/eByte23/samlsilly/branch/vnext)
 
 
 ### NOTE: When using >= SHA256 SignatureType

@@ -290,16 +290,17 @@ namespace SAMLSilly.Utils
             if (signatureAlgorithm == AlgorithmType.SHA256)
             {
 
-                var exportedKeyMaterial = cert.PrivateKey.ToXmlString(true);
+                // var exportedKeyMaterial = cert.PrivateKey.ToXmlString(true);
 
-                var cspParameters = new CspParameters(24);
-                var key = new RSACryptoServiceProvider(cspParameters);
-                key.PersistKeyInCsp = false;
-                key.FromXmlString(exportedKeyMaterial);
+                // var cspParameters = new CspParameters(24);
+                // var key = new RSACryptoServiceProvider(cspParameters);
+                // key.PersistKeyInCsp = false;
+                // key.FromXmlString(exportedKeyMaterial);
 
-                signedXml.SignedInfo.SignatureMethod = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+                // signedXml.SignedInfo.SignatureMethod = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
 
-                signedXml.SigningKey = key;
+                //signedXml.SigningKey = key;
+                signedXml.SigningKey = cert.PrivateKey;
             }
             else if (signatureAlgorithm == AlgorithmType.SHA1)
             {

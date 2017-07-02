@@ -45,7 +45,7 @@ namespace SAMLSilly.Tests
             _config.ServiceProvider.Endpoints.Add(new ServiceProviderEndpoint(EndpointType.SignOn, "/auth/saml2", "", BindingType.Post, false));
 
 
-            _config.IdentityProviders.AddByMetadataDirectory(@"Protocol\MetadataDocs\FOBS"); // Set it manually.
+            _config.IdentityProviders.AddByMetadataDirectory(Path.Combine("Protocol","MetadataDocs","FOBS")); // Set it manually.
 
 
 

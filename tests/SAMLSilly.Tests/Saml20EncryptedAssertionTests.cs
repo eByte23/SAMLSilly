@@ -84,7 +84,7 @@ namespace SAMLSilly.Tests
         public void HasNoAssertionBeforeDecrypt()
         {
             // Arrange
-            var doc = AssertionUtil.LoadXmlDocument(@"Assertions\EncryptedAssertion_01");
+            var doc = AssertionUtil.LoadXmlDocument(Path.Combine("Assertions","EncryptedAssertion_01"));
 
             // Act
             var encryptedAssertion = new Saml20EncryptedAssertion((RSA)_context.Sts_Dev_cetificate.PrivateKey, doc);
@@ -115,7 +115,7 @@ namespace SAMLSilly.Tests
             public void CanDecryptAssertion()
             {
                 // Arrange
-                var doc = AssertionUtil.LoadXmlDocument(@"Assertions\EncryptedAssertion_01");
+                var doc = AssertionUtil.LoadXmlDocument(Path.Combine("Assertions","EncryptedAssertion_01"));
                 var encryptedAssertion = new Saml20EncryptedAssertion((RSA)_context.Sts_Dev_cetificate.PrivateKey, doc);
 
                 // Act
@@ -134,7 +134,7 @@ namespace SAMLSilly.Tests
             public void CanDecryptAssertionWithPeerIncludedKeys()
             {
                 // Arrange
-                var doc = AssertionUtil.LoadXmlDocument(@"Assertions\EncryptedAssertion_02");
+                var doc = AssertionUtil.LoadXmlDocument(Path.Combine("Assertions","EncryptedAssertion_02"));
                 var encryptedAssertion = new Saml20EncryptedAssertion((RSA)_context.Sts_Dev_cetificate.PrivateKey, doc);
 
                 // Act
@@ -152,7 +152,7 @@ namespace SAMLSilly.Tests
             public void CanDecryptAssertionWithPeerIncluded3DesKeys()
             {
                 // Arrange
-                var doc = AssertionUtil.LoadXmlDocument(@"Assertions\EncryptedAssertion_04");
+                var doc = AssertionUtil.LoadXmlDocument(Path.Combine(@"Assertions","EncryptedAssertion_04"));
                 var encryptedAssertion = new Saml20EncryptedAssertion((RSA)_context.Sts_Dev_cetificate.PrivateKey, doc);
 
                 // Act
@@ -171,7 +171,7 @@ namespace SAMLSilly.Tests
             public void CanDecryptAssertionWithPeerIncludedAesKeys()
             {
                 // Arrange
-                var doc = AssertionUtil.LoadXmlDocument(@"Assertions\EncryptedAssertion_05");
+                var doc = AssertionUtil.LoadXmlDocument(Path.Combine("Assertions","EncryptedAssertion_05"));
                 var encryptedAssertion = new Saml20EncryptedAssertion((RSA)_context.Sts_Dev_cetificate.PrivateKey, doc);
 
                 // Act
@@ -191,7 +191,7 @@ namespace SAMLSilly.Tests
             public void CanDecryptAssertionWithPeerIncludedKeysWithoutSpecifiedEncryptionMethod()
             {
                 // Arrange
-                var doc = AssertionUtil.LoadXmlDocument(@"Assertions\EncryptedAssertion_03");
+                var doc = AssertionUtil.LoadXmlDocument(Path.Combine("Assertions","EncryptedAssertion_03"));
                 var encryptedAssertion = new Saml20EncryptedAssertion((RSA)_context.Sts_Dev_cetificate.PrivateKey, doc);
 
                 // Act

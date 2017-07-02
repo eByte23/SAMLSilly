@@ -273,7 +273,7 @@ namespace SAMLSilly.Tests
         /// <returns>The XML document.</returns>
         public static XmlDocument LoadBase64EncodedXmlDocument(string assertionFile)
         {
-            var assertionBase64 = File.ReadAllText(@"Assertions\fobs-assertion2");
+            var assertionBase64 = File.ReadAllText(Path.Combine("Assertions","fobs-assertion2"));
             var assertionBytes = Convert.FromBase64String(assertionBase64);
 
             var document = new XmlDocument { PreserveWhitespace = true };

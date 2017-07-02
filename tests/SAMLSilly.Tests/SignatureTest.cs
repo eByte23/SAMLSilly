@@ -28,9 +28,9 @@ namespace SAMLSilly.Tests
         [Fact]
         public void VerifyValidSignaturesAreValid()
         {
-            Assert.True(VerifySignature(@"Assertions\Saml2Assertion_01"));
-            Assert.True(VerifySignature(@"Assertions\Saml2Assertion_02"));
-            Assert.True(VerifySignature(@"Assertions\Saml2Assertion_03"));
+            Assert.True(VerifySignature(Path.Combine("Assertions","Saml2Assertion_01")));
+            Assert.True(VerifySignature(Path.Combine("Assertions","Saml2Assertion_02")));
+            Assert.True(VerifySignature(Path.Combine("Assertions","Saml2Assertion_03")));
         }
 
         /// <summary>
@@ -39,9 +39,9 @@ namespace SAMLSilly.Tests
         [Fact]
         public void VerifyManipulatedSignatureAreInvalid()
         {
-            Assert.False(VerifySignature(@"Assertions\EvilSaml2Assertion_01"));
-            Assert.False(VerifySignature(@"Assertions\EvilSaml2Assertion_02"));
-            Assert.False(VerifySignature(@"Assertions\EvilSaml2Assertion_03"));
+            Assert.False(VerifySignature(Path.Combine("Assertions","EvilSaml2Assertion_01")));
+            Assert.False(VerifySignature(Path.Combine("Assertions","EvilSaml2Assertion_02")));
+            Assert.False(VerifySignature(Path.Combine("Assertions","EvilSaml2Assertion_03")));
         }
 
         /// <summary>
@@ -50,9 +50,9 @@ namespace SAMLSilly.Tests
         [Fact(Skip = "TODO: test data needs fixing")]
         public void TestSaml20TokenVerification01()
         {
-            AssertionUtil.DeserializeToken(@"Assertions\Saml2Assertion_01");
-            AssertionUtil.DeserializeToken(@"Assertions\Saml2Assertion_02");
-            AssertionUtil.DeserializeToken(@"Assertions\Saml2Assertion_03");
+            AssertionUtil.DeserializeToken(Path.Combine("Assertions","Saml2Assertion_01"));
+            AssertionUtil.DeserializeToken(Path.Combine("Assertions","Saml2Assertion_02"));
+            AssertionUtil.DeserializeToken(Path.Combine("Assertions","Saml2Assertion_03"));
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace SAMLSilly.Tests
         {
             Assert.Throws(typeof(Saml20Exception), () =>
             {
-                AssertionUtil.DeserializeToken(@"Assertions\EvilSaml2Assertion_01");
+                AssertionUtil.DeserializeToken(Path.Combine("Assertions","EvilSaml2Assertion_01"));
             });
         }
 
@@ -77,7 +77,7 @@ namespace SAMLSilly.Tests
         {
             Assert.Throws(typeof(Saml20Exception), () =>
             {
-                AssertionUtil.DeserializeToken(@"Assertions\EvilSaml2Assertion_02");
+                AssertionUtil.DeserializeToken(Path.Combine("Assertions","EvilSaml2Assertion_02"));
             });
         }
 
@@ -90,7 +90,7 @@ namespace SAMLSilly.Tests
         {
             Assert.Throws(typeof(Saml20Exception), () =>
             {
-                AssertionUtil.DeserializeToken(@"Assertions\EvilSaml2Assertion_03");
+                AssertionUtil.DeserializeToken(Path.Combine("Assertions","EvilSaml2Assertion_03"));
             });
         }
 

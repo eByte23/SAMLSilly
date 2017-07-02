@@ -44,7 +44,7 @@ namespace SAMLSilly.Tests
             public void AddAttribute()
             {
                 // Arrange
-                var assertion = new Saml20Assertion(AssertionUtil.LoadXmlDocument(@"Assertions\Saml2Assertion_01").DocumentElement, null, false, TestConfiguration.Configuration);
+                var assertion = new Saml20Assertion(AssertionUtil.LoadXmlDocument(Path.Combine("Assertions","Saml2Assertion_01")).DocumentElement, null, false, TestConfiguration.Configuration);
                 var attributes = assertion.Attributes;
 
                 // This needs to be addressed and is why the test is ignored. See the original Hg project
@@ -73,7 +73,7 @@ namespace SAMLSilly.Tests
             public void CanReadAttributes()
             {
                 // Act
-                var assertion = new Saml20Assertion(AssertionUtil.LoadXmlDocument(@"Assertions\Saml2Assertion_01").DocumentElement, null, false, TestConfiguration.Configuration);
+                var assertion = new Saml20Assertion(AssertionUtil.LoadXmlDocument(Path.Combine("Assertions","Saml2Assertion_01")).DocumentElement, null, false, TestConfiguration.Configuration);
 
                 // Assert
                 Assert.True(assertion.Attributes.Any());

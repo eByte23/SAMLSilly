@@ -114,7 +114,8 @@ namespace SAMLSilly.Bindings
                 throw new ArgumentNullException("key");
             }
 
-            if (!(key is DSA || key is RSACryptoServiceProvider))
+            if (!(key is DSA || key is RSA))
+            //if (!(key is DSA || key is RSACryptoServiceProvider))
             {
                 throw new ArgumentException("The key must be an instance of either DSA or RSACryptoServiceProvider.");
             }
@@ -125,10 +126,13 @@ namespace SAMLSilly.Bindings
             }
 
             var hash = new SHA1Managed().ComputeHash(Encoding.UTF8.GetBytes(_signedquery));
-            if (key is RSACryptoServiceProvider)
+            //if (key is RSACryptoServiceProvider)
+            if (key is RSA)
             {
-                var rsa = (RSACryptoServiceProvider)key;
-                return rsa.VerifyHash(hash, "SHA1", DecodeSignature());
+
+                //var rsa = new RSACng()
+                var rsa = (RSA)key;
+                return rsa.VerifyHash(hash, DecodeSignature(), HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
             }
             else
             {

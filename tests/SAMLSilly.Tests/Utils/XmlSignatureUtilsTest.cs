@@ -42,7 +42,7 @@ namespace SAMLSilly.Tests.Utils
             public void CanCheckValidSignatures()
             {
                 // Arrange
-                var doc = LoadDocument(@"Assertions\Saml2Assertion_01");
+                var doc = LoadDocument(Path.Combine("Assertions","Saml2Assertion_01"));
 
                 // Act
                 var result = XmlSignatureUtils.CheckSignature(doc);
@@ -65,7 +65,7 @@ namespace SAMLSilly.Tests.Utils
             public void CanExtractKeyInfo()
             {
                 // Arrange
-                var doc = LoadDocument(@"Assertions\Saml2Assertion_01");
+                var doc = LoadDocument(Path.Combine("Assertions","Saml2Assertion_01"));
 
                 // Act
                 var keyInfo = XmlSignatureUtils.ExtractSignatureKeys(doc);
@@ -88,8 +88,8 @@ namespace SAMLSilly.Tests.Utils
             public void CanDetectIfDocumentIsSigned()
             {
                 // Arrange
-                var badDocument = LoadDocument(@"Assertions\EncryptedAssertion_01");
-                var goodDocument = LoadDocument(@"Assertions\Saml2Assertion_01");
+                var badDocument = LoadDocument(Path.Combine("Assertions","EncryptedAssertion_01"));
+                var goodDocument = LoadDocument(Path.Combine("Assertions","Saml2Assertion_01"));
 
                 // Act
                 var badResult = XmlSignatureUtils.IsSigned(badDocument);
@@ -107,7 +107,7 @@ namespace SAMLSilly.Tests.Utils
             public void FailsOnDocumentWithoutPreserveWhitespace()
             {
                 // Arrange
-                var doc = LoadDocument(@"Assertions\EncryptedAssertion_01");
+                var doc = LoadDocument(Path.Combine("Assertions","EncryptedAssertion_01"));
                 doc.PreserveWhitespace = false;
 
                 // Act

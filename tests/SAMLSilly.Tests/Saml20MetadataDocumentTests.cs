@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using SAMLSilly.Config;
@@ -50,14 +51,14 @@ namespace SAMLSilly.Tests
 
         public void Parse_metadata_from_xml()
         {
-            var metadata = new Saml20MetadataDocument().Load(FileLoadUtils.GetStream(@"Protocol\MetadataDocs\metadata-HAIKU.xml"));
+            var metadata = new Saml20MetadataDocument().Load(FileLoadUtils.GetStream(Path.Combine("Protocol","MetadataDocs","metadata-HAIKU.xml")));
 
         }
 
         [Fact]
         public void Parse_metadata_from_xml_test_idp()
         {
-            var metadata = new Saml20MetadataDocument().Load(FileLoadUtils.GetStream(@"Protocol\MetadataDocs\inlogik-test-adfs-metadata.xml"));
+            var metadata = new Saml20MetadataDocument().Load(FileLoadUtils.GetStream(Path.Combine("Protocol","MetadataDocs","inlogik-test-adfs-metadata.xml")));
             var a = metadata.EntityId;
         }
     }

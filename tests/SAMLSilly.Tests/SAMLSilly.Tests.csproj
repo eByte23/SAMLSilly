@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp2.0</TargetFramework>
+        <TargetFrameworks>netcoreapp2.0;net461</TargetFrameworks>
         <DebugType>portable</DebugType>
         <AssemblyName>SAMLSilly.Tests</AssemblyName>
         <PackageId>SAMLSilly.Tests</PackageId>
@@ -24,6 +24,9 @@
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-*" />
         <PackageReference Include="xunit" Version="2.2.0" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="xunit" Version="1.9.0.1566" />
         <ProjectReference Include="..\..\src\SAMLSilly\SAMLSilly.csproj">
             <Name>SAMLSilly.Core</Name>
         </ProjectReference>
@@ -33,7 +36,6 @@
         <None Include="Certificates\**\*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-
         <Content Include="Protocol\MetadataDocs\**\*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
@@ -41,9 +43,6 @@
         <EmbeddedResource Include="Certificates\SafewhereTest_SFS.pfx" />
     </ItemGroup>
     <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="1.0.0" />
-  </ItemGroup>
-    <ItemGroup>
-      <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+        <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="1.0.0" />
     </ItemGroup>
 </Project>

@@ -468,16 +468,16 @@ namespace SAMLSilly.Utils
 
         public static void SetupSHA256()
         {
-#if !NETCOREAPP2_0
+#if !NETSTANDARD2_0
             var addAlgorithmMethod = typeof(CryptoConfig).GetMethod("AddAlgorithm", BindingFlags.Public | BindingFlags.Static);
             if (addAlgorithmMethod == null)
             {
                 var ob1 = CryptoConfig.CreateFromName("SHA256");
-                AddAlgorithm(SAMLConstants.XmlDsigRSASHA256Url, typeof(RSAPKCS1SHA256SignatureDescription));
+                AddAlgorithm(Saml20Constants.XmlDsigRSASHA256Url, typeof(RSAPKCS1SHA256SignatureDescription));
             }
             else
             {
-                addAlgorithmMethod.Invoke(null, new object[] { typeof(RSAPKCS1SHA256SignatureDescription), new[] { SAMLConstants.XmlDsigRSASHA256Url } });
+                addAlgorithmMethod.Invoke(null, new object[] { typeof(RSAPKCS1SHA256SignatureDescription), new[] { Saml20Constants.XmlDsigRSASHA256Url } });
             }
 #endif
         }

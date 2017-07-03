@@ -177,11 +177,11 @@ namespace SAMLSilly.AspNetCore.BindingBuilders
                 }
                 else if (_config.SigningAlgorithm == AlgorithmType.SHA256)
                 {
-                    result.Append(UpperCaseUrlEncode(Uri.EscapeDataString("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256")));
+                    result.Append(UpperCaseUrlEncode(Uri.EscapeDataString(Saml20Constants.XmlDsigRSASHA256Url)));
                 }
-                else
+                else if (_config.SigningAlgorithm == AlgorithmType.SHA512)
                 {
-                    result.Append(UpperCaseUrlEncode(Uri.EscapeDataString(SignedXml.XmlDsigRSASHA1Url)));
+                    result.Append(UpperCaseUrlEncode(Uri.EscapeDataString(Saml20Constants.XmlDsigRSASHA512Url)));
                 }
             }
             else
@@ -217,6 +217,14 @@ namespace SAMLSilly.AspNetCore.BindingBuilders
                     privateKey1.ImportParameters(rsa.ExportParameters(true));
 
                     byte[] signature = privateKey1.SignData(data, "SHA256");
+                    return signature;
+                }
+                else if (_config.SigningAlgorithm == AlgorithmType.SHA512)
+                {
+                    RSACryptoServiceProvider privateKey1 = new RSACryptoServiceProvider();
+                    privateKey1.ImportParameters(rsa.ExportParameters(true));
+
+                    byte[] signature = privateKey1.SignData(data, "SHA512");
                     return signature;
                 }
                 else

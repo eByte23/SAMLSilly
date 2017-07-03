@@ -30,6 +30,7 @@ namespace SAMLSilly.Utils
 
             if (signedXml.SignatureMethod.Contains("rsa-sha256"))
             {
+                //TODO: @eByte23 why does this have to be done manually
                 // SHA256 keys must be obtained from message manually
                 var trustedCertificates = GetCertificates(doc);
                 foreach (var cert in trustedCertificates)
@@ -420,9 +421,13 @@ namespace SAMLSilly.Utils
             // To support SHA256 for XML signatures, an additional algorithm must be enabled.
             // This is not supported in .Net versions older than 4.0. In older versions,
             // an exception will be raised if an SHA256 signature method is attempted to be used.
-            if (signedXml.SignatureMethod.Contains("rsa-sha256"))
+            if (signedXml.SignatureMethod == Saml20Constants.XmlDsigRSASHA256Url)
             {
                 SetupSHA256();
+            }
+            else if (signedXml.SignatureMethod == Saml20Constants.XmlDsigRSASHA512Url)
+            {
+                SetupSHA512();
             }
 
             // verify that the inlined signature has a valid reference uri
@@ -436,13 +441,18 @@ namespace SAMLSilly.Utils
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
 
             Reference reference = new Reference();
-            reference.Uri = "";
-
             reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
             reference.AddTransform(new XmlDsigExcC14NTransform());
-            reference.DigestMethod = "http://www.w3.org/2001/04/xmlenc#sha256";
-            reference.Id = $"#{id}";
 
+            if (signatureAlgorithm == AlgorithmType.SHA256)
+            {
+                reference.DigestMethod = Saml20Constants.XmlDsigSHA256Url;
+            }
+            else if (signatureAlgorithm == AlgorithmType.SHA512)
+            {
+                reference.DigestMethod = Saml20Constants.XmlDsigSHA512Url;
+            }
+            reference.Uri = $"#{id}";
 
             signedXml.AddReference(reference);
             signedXml.KeyInfo = new KeyInfo();
@@ -469,12 +479,27 @@ namespace SAMLSilly.Utils
             }
         }
 
+        public static void SetupSHA512()
+        {
+            var addAlgorithmMethod = typeof(CryptoConfig).GetMethod("AddAlgorithm", BindingFlags.Public | BindingFlags.Static);
+            if (addAlgorithmMethod == null)
+            {
+                var ob1 = CryptoConfig.CreateFromName("SHA512");
+                AddAlgorithm(Saml20Constants.XmlDsigRSASHA512Url, typeof(RSAPKCS1SHA512SignatureDescription));
+            }
+            else
+            {
+                addAlgorithmMethod.Invoke(null, new object[] { typeof(RSAPKCS1SHA512SignatureDescription), new[] { Saml20Constants.XmlDsigRSASHA512Url } });
+            }
+        }
+
+
         private static void AddAlgorithm(String key, object value)
         {
 #if Version_4
-                       var defaultNameHT =
-                       typeof(CryptoConfig).GetField("defaultNameHT", BindingFlags.Static | BindingFlags.NonPublic)
-                       .GetValue(null) as Dictionary;
+            var defaultNameHT =
+            typeof(CryptoConfig).GetField("defaultNameHT", BindingFlags.Static | BindingFlags.NonPublic)
+            .GetValue(null) as Dictionary;
 #endif
 
             var defaultNameHT =
@@ -523,109 +548,5 @@ namespace SAMLSilly.Utils
         }
 
         #endregion
-
-        /// <summary>
-        /// Used to validate SHA256 signatures
-        /// </summary>
-        public class RSAPKCS1SHA256SignatureDescription : SignatureDescription
-        {
-            /// <summary>
-            /// Initializes a new instance of the <see cref="RSAPKCS1SHA256SignatureDescription"/> class.
-            /// </summary>
-            public RSAPKCS1SHA256SignatureDescription()
-            {
-                KeyAlgorithm = typeof(RSACryptoServiceProvider).FullName;
-                DigestAlgorithm = typeof(SHA256Managed).FullName;   // Note - SHA256CryptoServiceProvider is not registered with CryptoConfig
-                FormatterAlgorithm = typeof(RSAPKCS1SignatureFormatter).FullName;
-                DeformatterAlgorithm = typeof(RSAPKCS1SignatureDeformatter).FullName;
-            }
-
-            /// <summary>
-            /// Creates signature deformatter
-            /// </summary>
-            /// <param name="key">The key to use in the <see cref="T:System.Security.Cryptography.AsymmetricSignatureDeformatter" />.</param>
-            /// <returns>The newly created <see cref="T:System.Security.Cryptography.AsymmetricSignatureDeformatter" /> instance.</returns>
-            public override AsymmetricSignatureDeformatter CreateDeformatter(AsymmetricAlgorithm key)
-            {
-                if (key == null)
-                    throw new ArgumentNullException("RSAPKCS1SHA256SignatureDescription AsymmetricAlgorithm param: key is null");
-
-                RSAPKCS1SignatureDeformatter deformatter = new RSAPKCS1SignatureDeformatter(key);
-                deformatter.SetHashAlgorithm("SHA256");
-                return deformatter;
-            }
-
-            public override AsymmetricSignatureFormatter CreateFormatter(AsymmetricAlgorithm key)
-            {
-                if (key == null)
-                    throw new ArgumentNullException("RSAPKCS1SHA256SignatureDescription AsymmetricAlgorithm param: key is null");
-
-                RSAPKCS1SignatureFormatter formatter = new RSAPKCS1SignatureFormatter(key);
-                formatter.SetHashAlgorithm("SHA256");
-                return formatter;
-            }
-        }
-
-        /// <summary>
-        /// Signed XML with Id Resolvement class.
-        /// </summary>
-        public class SignedXmlWithIdResolvement : SignedXml
-        {
-            /// <summary>
-            /// Initializes a new instance of the <see cref="SignedXmlWithIdResolvement"/> class.
-            /// </summary>
-            /// <param name="document">The document.</param>
-            public SignedXmlWithIdResolvement(XmlDocument document) : base(document) { }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="SignedXmlWithIdResolvement"/> class from the specified <see cref="T:System.Xml.XmlElement"/> object.
-            /// </summary>
-            /// <param name="elem">The <see cref="T:System.Xml.XmlElement"/> object to use to initialize the new instance of <see cref="T:System.Security.Cryptography.Xml.SignedXml"/>.</param>
-            /// <exception cref="T:System.ArgumentNullException">
-            /// The <paramref name="elem"/> parameter is null.
-            /// </exception>
-            public SignedXmlWithIdResolvement(XmlElement elem) : base(elem) { }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="SignedXmlWithIdResolvement"/> class.
-            /// </summary>
-            public SignedXmlWithIdResolvement() { }
-
-            /// <summary>
-            /// Returns the <see cref="T:System.Xml.XmlElement"/> object with the specified ID from the specified <see cref="T:System.Xml.XmlDocument"/> object.
-            /// </summary>
-            /// <param name="document">The <see cref="T:System.Xml.XmlDocument"/> object to retrieve the <see cref="T:System.Xml.XmlElement"/> object from.</param>
-            /// <param name="idValue">The ID of the <see cref="T:System.Xml.XmlElement"/> object to retrieve from the <see cref="T:System.Xml.XmlDocument"/> object.</param>
-            /// <returns>The <see cref="T:System.Xml.XmlElement"/> object with the specified ID from the specified <see cref="T:System.Xml.XmlDocument"/> object, or null if it could not be found.</returns>
-            public override XmlElement GetIdElement(XmlDocument document, string idValue)
-            {
-                var elem = base.GetIdElement(document, idValue);
-                if (elem == null)
-                {
-                    var nl = document.GetElementsByTagName("*");
-                    var enumerator = nl.GetEnumerator();
-                    while (enumerator != null && enumerator.MoveNext())
-                    {
-                        var node = (XmlNode)enumerator.Current;
-                        if (node == null || node.Attributes == null)
-                        {
-                            continue;
-                        }
-
-                        var nodeEnum = node.Attributes.GetEnumerator();
-                        while (nodeEnum != null && nodeEnum.MoveNext())
-                        {
-                            var attr = (XmlAttribute)nodeEnum.Current;
-                            if (attr != null && (attr.LocalName.ToLower() == "id" && attr.Value == idValue && node is XmlElement))
-                            {
-                                return (XmlElement)node;
-                            }
-                        }
-                    }
-                }
-
-                return elem;
-            }
-        }
     }
 }

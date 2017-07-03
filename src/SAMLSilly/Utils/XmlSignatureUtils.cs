@@ -484,6 +484,7 @@ namespace SAMLSilly.Utils
 
         public static void SetupSHA512()
         {
+#if !NETSTANDARD2_0
             var addAlgorithmMethod = typeof(CryptoConfig).GetMethod("AddAlgorithm", BindingFlags.Public | BindingFlags.Static);
             if (addAlgorithmMethod == null)
             {
@@ -494,6 +495,7 @@ namespace SAMLSilly.Utils
             {
                 addAlgorithmMethod.Invoke(null, new object[] { typeof(RSAPKCS1SHA512SignatureDescription), new[] { Saml20Constants.XmlDsigRSASHA512Url } });
             }
+#endif
         }
 
 

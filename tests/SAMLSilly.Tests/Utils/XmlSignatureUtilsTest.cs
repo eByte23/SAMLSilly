@@ -38,8 +38,9 @@ namespace SAMLSilly.Tests.Utils
             /// <summary>
             /// Verify valid signatures can be checked.
             /// </summary>
+#if !NETSTANDARD2_0 && !NETCOREAPP2_0
             [Fact]
-            public void CanCheckValidSignatures()
+            public void CanCheckDSAValidSignatures()
             {
                 // Arrange
                 var doc = LoadDocument(Path.Combine("Assertions","Saml2Assertion_01"));
@@ -50,6 +51,7 @@ namespace SAMLSilly.Tests.Utils
                 // Assert
                 Assert.True(result);
             }
+#endif
         }
 
         /// <summary>

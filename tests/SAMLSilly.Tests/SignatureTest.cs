@@ -25,11 +25,18 @@ namespace SAMLSilly.Tests
         /// <summary>
         /// Verifies the signature in the "<c>Saml2Assertion_01</c>" file. The assertion in the file is valid.
         /// </summary>
+#if !NETSTANDARD2_0 && !NETCOREAPP2_0
         [Fact]
-        public void VerifyValidSignaturesAreValid()
+        public void VerifyValidDSASignaturesAreValid()
         {
             Assert.True(VerifySignature(Path.Combine("Assertions","Saml2Assertion_01")));
             Assert.True(VerifySignature(Path.Combine("Assertions","Saml2Assertion_02")));
+
+        }
+#endif
+        [Fact]
+        public void VerifyValidRSASignatureAreValid()
+        {
             Assert.True(VerifySignature(Path.Combine("Assertions","Saml2Assertion_03")));
         }
 

@@ -1,16 +1,20 @@
+pull_requests:
+  do_not_increment_build_number: true
 image: Visual Studio 2017
-version: 0.1.0-alpha{build}
+install:
+- ps: Invoke-WebRequest 'https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.ps1' -OutFile  ".\dotnet-install.ps1"
+- ps: .\dotnet-install.ps1 -Channel "Preview" -Version "2.0.0-preview1-005977"
 nuget:
   account_feed: true
   project_feed: true
 environment:
-  ver_num: 0.1.0
+  ver_num: 0.2.0
   ver_suffix: -alpha
 build_script:
 - cmd: >-
     build_server.bat
 test_script:
-- cmd: dotnet test .\tests\SAMLSilly.Tests\SAMLSilly.Tests.csproj
+- cmd: dotnet test .\tests\SAMLSilly.Tests\SAMLSilly.Tests.csproj --framework netcoreapp2.0
 after_test:
 - cmd: dotnet pack .\src\SAMLSilly\SAMLSilly.csproj -c Release -o ..\..\artifacts\ /property:version=%APPVEYOR_BUILD_VERSION%
 artifacts:

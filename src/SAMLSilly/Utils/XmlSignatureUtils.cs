@@ -287,24 +287,19 @@ namespace SAMLSilly.Utils
 
             var signedXml = new SignedXml(doc);
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
-            if (signatureAlgorithm == AlgorithmType.SHA256)
+            signedXml.SigningKey = cert.PrivateKey;
+
+            if (signatureAlgorithm == AlgorithmType.SHA1)
             {
-
-                // var exportedKeyMaterial = cert.PrivateKey.ToXmlString(true);
-
-                // var cspParameters = new CspParameters(24);
-                // var key = new RSACryptoServiceProvider(cspParameters);
-                // key.PersistKeyInCsp = false;
-                // key.FromXmlString(exportedKeyMaterial);
-
-                // signedXml.SignedInfo.SignatureMethod = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
-
-                //signedXml.SigningKey = key;
-                signedXml.SigningKey = cert.PrivateKey;
+                signedXml.SignedInfo.SignatureMethod = Saml20Constants.XmlDsigRSASHA1Url;
             }
-            else if (signatureAlgorithm == AlgorithmType.SHA1)
+            else if (signatureAlgorithm == AlgorithmType.SHA256)
             {
-                signedXml.SigningKey = cert.PrivateKey;
+               signedXml.SignedInfo.SignatureMethod = Saml20Constants.XmlDsigRSASHA256Url;
+            }
+            else if (signatureAlgorithm == AlgorithmType.SHA512)
+            {
+                signedXml.SignedInfo.SignatureMethod = Saml20Constants.XmlDsigRSASHA512Url;
             }
             else
             {

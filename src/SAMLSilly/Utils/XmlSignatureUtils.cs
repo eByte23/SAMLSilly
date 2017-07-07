@@ -180,6 +180,43 @@ namespace SAMLSilly.Utils
             return null;
         }
 
+        public static string GetHashAlgorithmUri(AlgorithmType algType)
+        {
+            switch (algType)
+            {
+                case AlgorithmType.SHA256:
+                    return Saml20Constants.XmlDsigRSASHA256Url;
+
+                case AlgorithmType.SHA512:
+                    return Saml20Constants.XmlDsigRSASHA512Url;
+
+                case AlgorithmType.SHA1:
+                default:
+                    return Saml20Constants.XmlDsigRSASHA1Url;
+            }
+        }
+
+        public static HashAlgorithm GetHashAlgorithm(AlgorithmType signingAlgorithm)
+        {
+            return GetHashAlgorithm(GetHashAlgorithmUri(signingAlgorithm));
+        }
+
+        public static HashAlgorithm GetHashAlgorithm(string algUrl)
+        {
+            switch (algUrl)
+            {
+                case Saml20Constants.XmlDsigRSASHA256Url:
+                    return new SHA256Managed();
+
+                case Saml20Constants.XmlDsigRSASHA512Url:
+                    return new SHA512Managed();
+
+                case Saml20Constants.XmlDsigRSASHA1Url:
+                default:
+                    return new SHA1Managed();
+            }
+        }
+
         /// <summary>
         /// Returns the KeyInfo element that is included with the signature in the element.
         /// </summary>
@@ -284,6 +321,7 @@ namespace SAMLSilly.Utils
         private static SignedXml SetupSignedDocWithSignatureType(XmlDocument doc, X509Certificate2 cert, AlgorithmType signatureAlgorithm)
         {
             SetupSHA256();
+            SetupSHA512();
 
             var signedXml = new SignedXml(doc);
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
@@ -291,14 +329,17 @@ namespace SAMLSilly.Utils
 
             if (signatureAlgorithm == AlgorithmType.SHA1)
             {
+                signedXml.SigningKey = GetPrivateKey(cert);
                 signedXml.SignedInfo.SignatureMethod = Saml20Constants.XmlDsigRSASHA1Url;
             }
             else if (signatureAlgorithm == AlgorithmType.SHA256)
             {
-               signedXml.SignedInfo.SignatureMethod = Saml20Constants.XmlDsigRSASHA256Url;
+                signedXml.SigningKey = GetPrivateKey(cert);
+                signedXml.SignedInfo.SignatureMethod = Saml20Constants.XmlDsigRSASHA256Url;
             }
             else if (signatureAlgorithm == AlgorithmType.SHA512)
             {
+                signedXml.SigningKey = GetPrivateKey(cert);
                 signedXml.SignedInfo.SignatureMethod = Saml20Constants.XmlDsigRSASHA512Url;
             }
             else
@@ -312,6 +353,27 @@ namespace SAMLSilly.Utils
         #endregion Public methods
 
         #region Private methods
+
+        public static AsymmetricAlgorithm GetPrivateKey(X509Certificate2 cert)
+        {
+            AsymmetricAlgorithm key = null;
+#if NET461 || NET35
+            var exportedKeyMaterial = cert.PrivateKey.ToXmlString( /* includePrivateParameters = */ true);
+
+            var cspParameters = new CspParameters(24 /* PROV_RSA_AES */);
+            var crypto = new RSACryptoServiceProvider(cspParameters);
+            crypto.PersistKeyInCsp = false;
+            crypto.FromXmlString(exportedKeyMaterial);
+            key = crypto;
+#elif NETCOREAPP2_0
+            key = cert.PrivateKey;
+
+#else
+            key = cert.PrivateKey;
+#endif
+            return key;
+
+        }
 
         /// <summary>
         /// Do checks on the document given. Every public method accepting a XmlDocument instance as parameter should
@@ -436,7 +498,7 @@ namespace SAMLSilly.Utils
             var signedXml = SetupSignedDocWithSignatureType(doc, certificate, signatureAlgorithm);
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
 
-            Reference reference = new Reference();
+            Reference reference = new Reference($"#{id}");
             reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
             reference.AddTransform(new XmlDsigExcC14NTransform());
 
@@ -448,7 +510,6 @@ namespace SAMLSilly.Utils
             {
                 reference.DigestMethod = Saml20Constants.XmlDsigSHA512Url;
             }
-            reference.Uri = $"#{id}";
 
             signedXml.AddReference(reference);
             signedXml.KeyInfo = new KeyInfo();

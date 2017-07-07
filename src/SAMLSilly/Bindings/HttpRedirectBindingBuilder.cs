@@ -6,6 +6,7 @@ using CONSTS = SAMLSilly.Bindings.HttpRedirectBindingConstants;
 using SAMLSilly.Bindings;
 using SAMLSilly.Utils;
 using SAMLSilly.Config;
+using System.Security.Cryptography.X509Certificates;
 
 namespace SAMLSilly.AspNetCore.BindingBuilders
 {
@@ -15,15 +16,10 @@ namespace SAMLSilly.AspNetCore.BindingBuilders
     /// </summary>
     public class HttpRedirectBindingBuilder
     {
-        public HttpRedirectBindingBuilder(Saml2Configuration config)
-        {
-            _config = config;
-        }
-
         /// <summary>
         /// SAML configuration field
         /// </summary>
-        private Saml2Configuration _config;
+        private AlgorithmType _signingAlgorithm;
 
         /// <summary>
         /// Request backing field.
@@ -38,7 +34,7 @@ namespace SAMLSilly.AspNetCore.BindingBuilders
         /// <summary>
         /// SigningKey backing field.
         /// </summary>
-        private AsymmetricAlgorithm _signingKey;
+        private X509Certificate2 _signingCertificate;
 
         /// <summary>
         /// Gets or sets the request.
@@ -87,20 +83,22 @@ namespace SAMLSilly.AspNetCore.BindingBuilders
         /// Gets or sets the signing key.
         /// </summary>
         /// <value>The signing key.</value>
-        public AsymmetricAlgorithm SigningKey
+        public X509Certificate2 SigningCertificate
         {
-            get { return _signingKey; }
+            get { return _signingCertificate; }
             set
             {
                 // Check if the key is of a supported type. [SAMLBind] sect. 3.4.4.1 specifies this.
-                if (!(value is RSACryptoServiceProvider || value is DSA || value == null))
+                if (!(value.PrivateKey is RSACryptoServiceProvider || value.PrivateKey is DSA || value.PrivateKey == null))
                 {
                     throw new ArgumentException("Signing key must be an instance of either RSACryptoServiceProvider or DSA.");
                 }
 
-                _signingKey = value;
+                _signingCertificate = value;
             }
         }
+
+        public AlgorithmType SigningAlgorithm { get => _signingAlgorithm; set => _signingAlgorithm = value; }
 
         /// <summary>
         /// Returns the query part of the url that should be redirected to.
@@ -161,33 +159,24 @@ namespace SAMLSilly.AspNetCore.BindingBuilders
         /// <param name="result">The result.</param>
         private void AddSignature(StringBuilder result)
         {
-            if (_signingKey == null)
+            if (_signingCertificate == null || _signingCertificate.PrivateKey == null)
             {
                 return;
             }
 
             result.Append(string.Format("&{0}=", HttpRedirectBindingConstants.SigAlg));
+            string signatureUri = SignedXml.XmlDsigRSASHA1Url;
 
-            if (_signingKey is RSA)
+            if (_signingCertificate.PrivateKey is RSA)
             {
-
-                if (_config.SigningAlgorithm == AlgorithmType.SHA1)
-                {
-                    result.Append(UpperCaseUrlEncode(Uri.EscapeDataString(SignedXml.XmlDsigRSASHA1Url)));
-                }
-                else if (_config.SigningAlgorithm == AlgorithmType.SHA256)
-                {
-                    result.Append(UpperCaseUrlEncode(Uri.EscapeDataString(Saml20Constants.XmlDsigRSASHA256Url)));
-                }
-                else if (_config.SigningAlgorithm == AlgorithmType.SHA512)
-                {
-                    result.Append(UpperCaseUrlEncode(Uri.EscapeDataString(Saml20Constants.XmlDsigRSASHA512Url)));
-                }
+                signatureUri = XmlSignatureUtils.GetHashAlgorithmUri(SigningAlgorithm);
             }
             else
             {
-                result.Append(UpperCaseUrlEncode(Uri.EscapeDataString(SignedXml.XmlDsigDSAUrl)));
+                signatureUri = SignedXml.XmlDsigDSAUrl;
             }
+
+            result.Append(UpperCaseUrlEncode(Uri.EscapeDataString(signatureUri)));
 
             // Calculate the signature of the URL as described in [SAMLBind] section 3.4.4.1.
             var signature = SignData(Encoding.UTF8.GetBytes(result.ToString()));
@@ -203,38 +192,16 @@ namespace SAMLSilly.AspNetCore.BindingBuilders
         /// <returns>SignData based on passed data and SigningKey.</returns>
         private byte[] SignData(byte[] data)
         {
-            if (_signingKey is RSACryptoServiceProvider)
+            if (_signingCertificate.PrivateKey is RSACryptoServiceProvider)
             {
-                var rsa = (RSACryptoServiceProvider)_signingKey;
+                var rsa = (RSACryptoServiceProvider)XmlSignatureUtils.GetPrivateKey(_signingCertificate);
+                HashAlgorithm hashAlgorithm = XmlSignatureUtils.GetHashAlgorithm(SigningAlgorithm);
 
-                if (_config.SigningAlgorithm == AlgorithmType.SHA1)
-                {
-                    return rsa.SignData(data, new SHA1CryptoServiceProvider());
-                }
-                else if (_config.SigningAlgorithm == AlgorithmType.SHA256)
-                {
-                    RSACryptoServiceProvider privateKey1 = new RSACryptoServiceProvider();
-                    privateKey1.ImportParameters(rsa.ExportParameters(true));
-
-                    byte[] signature = privateKey1.SignData(data, "SHA256");
-                    return signature;
-                }
-                else if (_config.SigningAlgorithm == AlgorithmType.SHA512)
-                {
-                    RSACryptoServiceProvider privateKey1 = new RSACryptoServiceProvider();
-                    privateKey1.ImportParameters(rsa.ExportParameters(true));
-
-                    byte[] signature = privateKey1.SignData(data, "SHA512");
-                    return signature;
-                }
-                else
-                {
-                    return rsa.SignData(data, new SHA1CryptoServiceProvider());
-                }
+                return rsa.SignData(data, hashAlgorithm);
             }
             else
             {
-                var dsa = (DSACryptoServiceProvider)_signingKey;
+                var dsa = (DSACryptoServiceProvider)_signingCertificate.PrivateKey;
                 return dsa.SignData(data);
             }
         }

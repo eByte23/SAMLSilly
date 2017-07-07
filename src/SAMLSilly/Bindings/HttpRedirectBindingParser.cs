@@ -115,7 +115,6 @@ namespace SAMLSilly.Bindings
             }
 
             if (!(key is DSA || key is RSA))
-            //if (!(key is DSA || key is RSACryptoServiceProvider))
             {
                 throw new ArgumentException("The key must be an instance of either DSA or RSACryptoServiceProvider.");
             }
@@ -125,14 +124,13 @@ namespace SAMLSilly.Bindings
                 throw new InvalidOperationException("Query is not signed, so there is no signature to verify.");
             }
 
-            var hash = new SHA1Managed().ComputeHash(Encoding.UTF8.GetBytes(_signedquery));
-            //if (key is RSACryptoServiceProvider)
+            var hashAlgorithm = XmlSignatureUtils.GetHashAlgorithm(SignatureAlgorithm);
+            var hash = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(_signedquery));
+
             if (key is RSA)
             {
-
-                //var rsa = new RSACng()
                 var rsa = (RSA)key;
-                return rsa.VerifyHash(hash, DecodeSignature(), HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
+                return VerifyHash(hashAlgorithm, rsa, hash, DecodeSignature());
             }
             else
             {
@@ -258,6 +256,27 @@ namespace SAMLSilly.Bindings
                     Signature = value;
                     return;
             }
+        }
+
+
+        private bool VerifyHash(HashAlgorithm hashAlg, RSA rsa, byte[] hash, byte[] v)
+        {
+            HashAlgorithmName hashAlgName = HashAlgorithmName.SHA1;
+
+            if (hashAlg is SHA1Managed)
+            {
+                hashAlgName = HashAlgorithmName.SHA1;
+            }
+            else if (hashAlg is SHA256Managed)
+            {
+                hashAlgName = HashAlgorithmName.SHA256;
+            }
+            else if (hashAlg is SHA512Managed)
+            {
+                hashAlgName = HashAlgorithmName.SHA512;
+            }
+
+            return rsa.VerifyHash(hash, v, hashAlgName, RSASignaturePadding.Pkcs1);
         }
     }
 }

@@ -48,12 +48,12 @@ namespace SAMLSilly.Tests.Bindings
             /// Verify that basic encoding and decoding of a Request works.
             /// Verify that the parser correctly detects a Request parameter.
             /// </summary>
-            [Fact(Skip = "Fix new config ctor param added")]
+            [Fact(Skip = "We are fix this now")]
             public void ParserCanEncodeAndDecodeRequest()
             {
                 // Arrange
                 var request = string.Empty.PadLeft(350, 'A') + "������";
-                var bindingBuilder = new HttpRedirectBindingBuilder(null) { Request = request };
+                var bindingBuilder = new HttpRedirectBindingBuilder() { Request = request };
 
                 var query = bindingBuilder.ToQuery();
                 var coll = QueryToNameValueCollection(query);
@@ -73,14 +73,14 @@ namespace SAMLSilly.Tests.Bindings
             /// <summary>
             /// Verify that basic encoding and decoding of a RelayState works.
             /// </summary>
-            [Fact(Skip = "new ctor param")]
+            [Fact(Skip = "We are fix this now")]
             public void ParserCanEncodeAndDecodeRequestWithRelayState()
             {
                 // Arrange
                 var request = string.Empty.PadRight(140, 'l');
                 var relaystate = "A relaystate test. @@@!!!&&&///";
 
-                var bindingBuilder = new HttpRedirectBindingBuilder(null)
+                var bindingBuilder = new HttpRedirectBindingBuilder()
                 {
                     Request = request,
                     RelayState = relaystate
@@ -106,17 +106,17 @@ namespace SAMLSilly.Tests.Bindings
             /// <summary>
             /// Uses a DSA key to sign and verify the Authentication request.
             /// </summary>
-            [Fact(Skip = "new ctor param")]
+            [Fact(Skip = "new ctor param hmmmmm")]
             public void ParserCanSignAuthnRequestWithDsaKey()
             {
                 // Arrange
                 var key = new DSACryptoServiceProvider();
                 var evilKey = new DSACryptoServiceProvider();
 
-                var binding = new HttpRedirectBindingBuilder(null)
+                var binding = new HttpRedirectBindingBuilder()
                 {
                     Request = string.Empty.PadLeft(500, 'a'),
-                    SigningKey = key
+                    //SigningCertificate = key
                 };
 
                 var url = new Uri("http://localhost/?" + binding.ToQuery());
@@ -134,17 +134,17 @@ namespace SAMLSilly.Tests.Bindings
             /// <summary>
             /// Uses a RSA key to sign and verify the Authentication request.
             /// </summary>
-            [Fact(Skip = "new ctor param")]
+            [Fact(Skip = "new ctor param hmmmmmm")]
             public void ParserCanSignAuthnRequestWithRsaKey()
             {
                 // Arrange
                 var key = new RSACryptoServiceProvider();
                 var evilKey = new RSACryptoServiceProvider();
 
-                var binding = new HttpRedirectBindingBuilder(null)
+                var binding = new HttpRedirectBindingBuilder()
                 {
                     Request = string.Empty.PadLeft(500, 'a'),
-                    SigningKey = key
+                    //SigningCertificate = key
                 };
 
                 var url = new Uri("http://localhost/?" + binding.ToQuery());
@@ -213,7 +213,7 @@ namespace SAMLSilly.Tests.Bindings
             {
                 // Arrange
                 var request = string.Empty.PadLeft(350, 'A') + "������";
-                var bindingBuilder = new HttpRedirectBindingBuilder(null) { Request = request };
+                var bindingBuilder = new HttpRedirectBindingBuilder() { Request = request };
 
                 var query = bindingBuilder.ToQuery();
                 var url = new Uri("http://localhost/?" + query);

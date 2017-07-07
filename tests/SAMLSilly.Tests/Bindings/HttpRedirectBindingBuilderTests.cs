@@ -19,7 +19,7 @@ namespace SAML2.Tests.Bindings
             /// <summary>
             /// Ensure that it is not possible to add a request, when a response has already been added.
             /// </summary>
-            [Fact(Skip = "Fix new config ctor param added")]
+            [Fact(Skip = "We are fix this now")]
             public void DoesNotAllowResponseAndRequestToBothBeSet()
             {
 
@@ -27,7 +27,7 @@ namespace SAML2.Tests.Bindings
                 Assert.Throws(typeof(ArgumentException), () =>
                 {
                     // Arrange
-                    var binding = new HttpRedirectBindingBuilder(null)
+                    var binding = new HttpRedirectBindingBuilder()
                     {
                         Response = "Response"
                     };
@@ -48,12 +48,12 @@ namespace SAML2.Tests.Bindings
             /// <summary>
             /// Ensure that it is not possible to add a response, when a request has already been added.
             /// </summary>
-            [Fact(Skip = "Fix new config ctor param added")]
+            [Fact(Skip = "We are fix this now")]
             //"HttpRedirectBinding did not throw an exception when both Request and Response were set."
             public void DoesNotAllowRequestAndResponseToBothBeSet()
             {
                 // Arrange
-                var binding = new HttpRedirectBindingBuilder(null)
+                var binding = new HttpRedirectBindingBuilder()
                 {
                     Request = "Request"
                 };
@@ -76,12 +76,12 @@ namespace SAML2.Tests.Bindings
             /// <summary>
             /// Tests that when using the builder to create a response, the relay state is not encoded.
             /// </summary>
-            [Fact(Skip = "Fix new config ctor param added")]
+           [Fact(Skip = "We are fix this now")]
             public void DoesNotEncodeRelayStateForResponse()
             {
                 // Arrange
                 var relaystate = string.Empty.PadRight(10, 'A');
-                var bindingBuilder = new HttpRedirectBindingBuilder(null)
+                var bindingBuilder = new HttpRedirectBindingBuilder()
                 {
                     RelayState = relaystate,
                     Response = "A random response... !!!! .... "
@@ -97,12 +97,12 @@ namespace SAML2.Tests.Bindings
             /// <summary>
             /// Tests that when using the builder to create a request, the relay state is encoded.
             /// </summary>
-            [Fact(Skip = "Fix new config ctor param added")]
+           [Fact(Skip = "We are fix this now")]
             public void EncodesRelayStateForRequests()
             {
                 // Arrange
                 var relaystate = string.Empty.PadRight(10, 'A');
-                var bindingBuilder = new HttpRedirectBindingBuilder(null)
+                var bindingBuilder = new HttpRedirectBindingBuilder()
                 {
                     Request = "A random request... !!!! .... ",
                     RelayState = relaystate

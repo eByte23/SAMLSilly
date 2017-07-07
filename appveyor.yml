@@ -14,7 +14,7 @@ build_script:
 - cmd: >-
     build_server.bat
 test_script:
-- cmd: dotnet test .\tests\SAMLSilly.Tests\SAMLSilly.Tests.csproj --framework netcoreapp2.0
+- cmd: dotnet test .\tests\SAMLSilly.Tests\SAMLSilly.Tests.csproj
 after_test:
 - cmd: dotnet pack .\src\SAMLSilly\SAMLSilly.csproj -c Release -o ..\..\artifacts\ /property:version=%APPVEYOR_BUILD_VERSION%
 artifacts:

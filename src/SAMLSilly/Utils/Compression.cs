@@ -13,13 +13,22 @@ namespace SAMLSilly.Utils
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The decompressed value.</returns>
-        public static string Inflate(string value)
+        public static string Inflate(string value) => Inflate(value, Encoding.UTF8);
+
+        /// <summary>
+        /// Take a Base64-encoded string, decompress the result using the DEFLATE algorithm and return the resulting
+        /// string.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="overrideEncoding">The encoding to use other than default we decoding string.</param>
+        /// <returns>The decompressed value.</returns>
+        public static string Inflate(string value, Encoding overrideEncoding)
         {
             var encoded = Convert.FromBase64String(value);
 
             var result = new StringBuilder();
             using (var stream = new DeflateStream(new MemoryStream(encoded), CompressionMode.Decompress))
-            using (var testStream = new StreamReader(new BufferedStream(stream), new UTF8Encoding(false)))
+            using (var testStream = new StreamReader(new BufferedStream(stream), overrideEncoding))
             {
                 // It seems we need to "peek" on the StreamReader to get it started. If we don't do this, the first call to
                 // ReadToEnd() will return string.empty.

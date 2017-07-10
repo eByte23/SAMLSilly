@@ -196,6 +196,38 @@ namespace SAMLSilly.Utils
             }
         }
 
+         public static HashAlgorithmName GetHashAlgorithmName(AlgorithmType algType)
+        {
+            switch (algType)
+            {
+                case AlgorithmType.SHA256:
+                    return HashAlgorithmName.SHA256;
+
+                case AlgorithmType.SHA512:
+                    return HashAlgorithmName.SHA512;
+
+                case AlgorithmType.SHA1:
+                default:
+                    return HashAlgorithmName.SHA1;
+            }
+        }
+
+        public static AlgorithmType GetHashAlgorithmType(string hash)
+        {
+            switch (hash)
+            {
+                case Saml20Constants.XmlDsigRSASHA256Url:
+                    return AlgorithmType.SHA256;
+
+                case Saml20Constants.XmlDsigRSASHA512Url:
+                    return AlgorithmType.SHA512;
+
+                case Saml20Constants.XmlDsigRSASHA1Url:
+                default:
+                    return AlgorithmType.SHA1;
+            }
+        }
+
         public static HashAlgorithm GetHashAlgorithm(AlgorithmType signingAlgorithm)
         {
             return GetHashAlgorithm(GetHashAlgorithmUri(signingAlgorithm));

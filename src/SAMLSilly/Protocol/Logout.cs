@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using SAMLSilly.Config;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
+using Microsoft.AspNetCore.Http;
 
 namespace SAMLSilly.Protocol
 {
@@ -21,7 +23,7 @@ namespace SAMLSilly.Protocol
             this.logger = logger.CreateLogger<Logout>();
             this.config = config ?? throw new ArgumentNullException("config");
         }
-        public void ValidateLogoutRequest(string requestType, System.Collections.Specialized.NameValueCollection requestParams, Uri requestUrl)
+        public void ValidateLogoutRequest(string requestType, IEnumerable<KeyValuePair<string, StringValues>> requestParams, Uri requestUrl)
         {
             logger.LogDebug(TraceMessages.LogoutResponseReceived);
 
@@ -51,7 +53,7 @@ namespace SAMLSilly.Protocol
             }
         }
 
-        private void ValidateLogoutViaPost(System.Collections.Specialized.NameValueCollection requestParams, out string message, out LogoutResponse response)
+        private void ValidateLogoutViaPost(IEnumerable<KeyValuePair<string, StringValues>> requestParams, out string message, out LogoutResponse response)
         {
             var parser = new HttpPostBindingParser(requestParams);
             logger.LogDebug(TraceMessages.LogoutResponsePostBindingParse, parser.Message);
@@ -70,7 +72,7 @@ namespace SAMLSilly.Protocol
             }
 
             // signature on final message in logout
-            if (!parser.CheckSignature(idp.Metadata.Keys)) {
+            if (!parser.VerifySignature(idp.Metadata.Keys)) {
                 logger.LogError(ErrorMessages.ResponseSignatureInvalid);
                 throw new Saml20Exception(ErrorMessages.ResponseSignatureInvalid);
             }
@@ -80,7 +82,8 @@ namespace SAMLSilly.Protocol
 
         private void ValidateLogoutViaGet(Uri requestUrl, out string message, out LogoutResponse response)
         {
-            var parser = new HttpRedirectBindingParser(requestUrl);
+            var queryParams = BindingUtility.QueryStringToKeyValuePair(requestUrl.Query);
+            var parser = new HttpRedirectBindingParser(queryParams);;
             response = Serialization.DeserializeFromXmlString<LogoutResponse>(parser.Message);
 
             logger.LogDebug(TraceMessages.LogoutResponseRedirectBindingParse, parser.Message, parser.SignatureAlgorithm, parser.Signature);

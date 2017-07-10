@@ -6,20 +6,23 @@ using System.Xml;
 using SAMLSilly.Schema.Metadata;
 using SAMLSilly.Utils;
 using System.Collections.Specialized;
+using Microsoft.Extensions.Primitives;
+using System.Linq;
 
 namespace SAMLSilly.Bindings
 {
     /// <summary>
     /// Parses the response messages related to the HTTP POST binding.
     /// </summary>
-    public class HttpPostBindingParser
+    public class HttpPostBindingParser : IHttpBindingParser
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpPostBindingParser"/> class.
         /// </summary>
         /// <param name="context">The current HTTP context.</param>
-        public HttpPostBindingParser(NameValueCollection requestParams)
+        public HttpPostBindingParser(IEnumerable<KeyValuePair<string, StringValues>> formParams)
         {
+            var requestParams = formParams.ToDictionary(x => x.Key, x => x.Value.Where(v => v != StringValues.Empty).FirstOrDefault() ?? string.Empty);
             var base64 = string.Empty;
 
             if (requestParams["SAMLRequest"] != null)
@@ -62,7 +65,7 @@ namespace SAMLSilly.Bindings
         {
             get { return XmlSignatureUtils.IsSigned(Document); }
         }
-        
+
         /// <summary>
         /// Gets the message.
         /// </summary>
@@ -72,7 +75,7 @@ namespace SAMLSilly.Bindings
         /// Checks the signature.
         /// </summary>
         /// <returns>True of the signature is valid, else false.</returns>
-        public bool CheckSignature()
+        private bool VerifySignature()
         {
             return XmlSignatureUtils.CheckSignature(Document);
         }
@@ -82,7 +85,7 @@ namespace SAMLSilly.Bindings
         /// </summary>
         /// <param name="keys">The set of keys to check the signature against</param>
         /// <returns>True of the signature is valid, else false.</returns>
-        public bool CheckSignature(IEnumerable<KeyDescriptor> keys)
+        public bool VerifySignature(IEnumerable<KeyDescriptor> keys)
         {
             foreach (var keyDescriptor in keys)
             {

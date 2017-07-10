@@ -6,13 +6,16 @@ using System.Security.Cryptography.Xml;
 using System.Text;
 using SAMLSilly.Schema.Metadata;
 using SAMLSilly.Utils;
+using System.Collections;
+using System.Reflection;
+using Microsoft.Extensions.Primitives;
 
 namespace SAMLSilly.Bindings
 {
     /// <summary>
     /// Parses and validates the query parameters of a HttpRedirectBinding. [SAMLBind] section 3.4.
     /// </summary>
-    public class HttpRedirectBindingParser
+    public class HttpRedirectBindingParser : IHttpBindingParser
     {
         /// <summary>
         /// <c>RelaystateDecoded</c> backing field.
@@ -29,15 +32,16 @@ namespace SAMLSilly.Bindings
         /// </summary>
         /// <param name="uri">The URL that the user was redirected to by the IDP. It is essential for the survival of the signature,
         /// that the URL is not modified in any way, e.g. by URL-decoding it.</param>
-        public HttpRedirectBindingParser(Uri uri)
+        public HttpRedirectBindingParser(IEnumerable<KeyValuePair<string, StringValues>> queryParams)
         {
-            var paramDict = UriToDictionary(uri);
+            var paramDict = queryParams.ToDictionary(x => x.Key, x => x.Value.Where(v => v != StringValues.Empty).FirstOrDefault() ?? string.Empty);
+            // If the message is signed, save the original, encoded parameters so that the signature can be verified.
+
             foreach (var param in paramDict)
             {
-                SetParam(param.Key, Uri.UnescapeDataString(param.Value));
+                SetParam(param.Key, param.Value);
             }
 
-            // If the message is signed, save the original, encoded parameters so that the signature can be verified.
             if (IsSigned)
             {
                 CreateSignatureSubject(paramDict);
@@ -162,49 +166,32 @@ namespace SAMLSilly.Bindings
         }
 
         /// <summary>
-        /// Converts the URI to dictionary.
-        /// </summary>
-        /// <param name="uri">The URI.</param>
-        /// <returns>Dictionary of query parameters.</returns>
-        private static Dictionary<string, string> UriToDictionary(Uri uri)
-        {
-            var parameters = uri.Query.Substring(1).Split('&');
-            var result = new Dictionary<string, string>(parameters.Length);
-            foreach (var parameter in parameters.Select(s => s.Split('=')))
-            {
-                result.Add(parameter[0], parameter[1]);
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Re-creates the list of parameters that are signed, in order to verify the signature.
         /// </summary>
         /// <param name="queryParams">The query parameters.</param>
-        private void CreateSignatureSubject(IDictionary<string, string> queryParams)
+        private void CreateSignatureSubject(Dictionary<string, string> queryParams)
         {
-            var signedQuery = new StringBuilder();
+            var signedQuery = string.Empty;
             if (IsResponse)
             {
-                signedQuery.AppendFormat("{0}={1}", HttpRedirectBindingConstants.SamlResponse, queryParams[HttpRedirectBindingConstants.SamlResponse]);
+                signedQuery += $"{HttpRedirectBindingConstants.SamlResponse}={Uri.EscapeDataString(queryParams[HttpRedirectBindingConstants.SamlResponse])}";
             }
             else
             {
-                signedQuery.AppendFormat("{0}={1}", HttpRedirectBindingConstants.SamlRequest, queryParams[HttpRedirectBindingConstants.SamlRequest]);
+                signedQuery += $"{HttpRedirectBindingConstants.SamlRequest}={Uri.EscapeDataString(queryParams[HttpRedirectBindingConstants.SamlRequest])}";
             }
 
             if (RelayState != null)
             {
-                signedQuery.AppendFormat("&{0}={1}", HttpRedirectBindingConstants.RelayState, queryParams[HttpRedirectBindingConstants.RelayState]);
+                signedQuery += $"&{HttpRedirectBindingConstants.RelayState}={Uri.EscapeDataString(queryParams[HttpRedirectBindingConstants.RelayState])}";
             }
 
             if (Signature != null)
             {
-                signedQuery.AppendFormat("&{0}={1}", HttpRedirectBindingConstants.SigAlg, queryParams[HttpRedirectBindingConstants.SigAlg]);
+                signedQuery += $"&{HttpRedirectBindingConstants.SigAlg}={Uri.EscapeDataString(queryParams[HttpRedirectBindingConstants.SigAlg])}";
             }
 
-            _signedquery = signedQuery.ToString();
+            _signedquery = signedQuery;
         }
 
         /// <summary>
@@ -279,4 +266,6 @@ namespace SAMLSilly.Bindings
             return rsa.VerifyHash(hash, v, hashAlgName, RSASignaturePadding.Pkcs1);
         }
     }
+
+
 }

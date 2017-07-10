@@ -19,7 +19,7 @@ namespace SAML2.Tests.Bindings
             /// <summary>
             /// Ensure that it is not possible to add a request, when a response has already been added.
             /// </summary>
-            [Fact(Skip = "We are fix this now")]
+            [Fact]
             public void DoesNotAllowResponseAndRequestToBothBeSet()
             {
 
@@ -48,7 +48,7 @@ namespace SAML2.Tests.Bindings
             /// <summary>
             /// Ensure that it is not possible to add a response, when a request has already been added.
             /// </summary>
-            [Fact(Skip = "We are fix this now")]
+            [Fact]
             //"HttpRedirectBinding did not throw an exception when both Request and Response were set."
             public void DoesNotAllowRequestAndResponseToBothBeSet()
             {
@@ -76,7 +76,7 @@ namespace SAML2.Tests.Bindings
             /// <summary>
             /// Tests that when using the builder to create a response, the relay state is not encoded.
             /// </summary>
-           [Fact(Skip = "We are fix this now")]
+           [Fact]
             public void DoesNotEncodeRelayStateForResponse()
             {
                 // Arrange
@@ -97,7 +97,7 @@ namespace SAML2.Tests.Bindings
             /// <summary>
             /// Tests that when using the builder to create a request, the relay state is encoded.
             /// </summary>
-           [Fact(Skip = "We are fix this now")]
+           [Fact]
             public void EncodesRelayStateForRequests()
             {
                 // Arrange

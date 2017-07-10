@@ -89,7 +89,7 @@ namespace SAMLSilly.AspNetCore.BindingBuilders
             set
             {
                 // Check if the key is of a supported type. [SAMLBind] sect. 3.4.4.1 specifies this.
-                if (!(value.PrivateKey is RSACryptoServiceProvider || value.PrivateKey is DSA || value.PrivateKey == null))
+                if (!(value.PrivateKey is RSA || value.PrivateKey is DSA || value.PrivateKey == null))
                 {
                     throw new ArgumentException("Signing key must be an instance of either RSACryptoServiceProvider or DSA.");
                 }
@@ -112,26 +112,6 @@ namespace SAMLSilly.AspNetCore.BindingBuilders
             AddMessageParameter(result);
             AddRelayState(result);
             AddSignature(result);
-
-            return result.ToString();
-        }
-
-        /// <summary>
-        /// Uppercase the URL-encoded parts of the string. Needed because Ping does not seem to be able to handle lower-cased URL-encodings.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>The value with URL encodings uppercased.</returns>
-        private static string UpperCaseUrlEncode(string value)
-        {
-            var result = new StringBuilder(value);
-            for (var i = 0; i < result.Length; i++)
-            {
-                if (result[i] == '%')
-                {
-                    result[++i] = char.ToUpper(result[i]);
-                    result[++i] = char.ToUpper(result[i]);
-                }
-            }
 
             return result.ToString();
         }
@@ -176,7 +156,7 @@ namespace SAMLSilly.AspNetCore.BindingBuilders
                 signatureUri = SignedXml.XmlDsigDSAUrl;
             }
 
-            result.Append(UpperCaseUrlEncode(Uri.EscapeDataString(signatureUri)));
+            result.Append(Uri.EscapeDataString(signatureUri));
 
             // Calculate the signature of the URL as described in [SAMLBind] section 3.4.4.1.
             var signature = SignData(Encoding.UTF8.GetBytes(result.ToString()));
@@ -192,12 +172,12 @@ namespace SAMLSilly.AspNetCore.BindingBuilders
         /// <returns>SignData based on passed data and SigningKey.</returns>
         private byte[] SignData(byte[] data)
         {
-            if (_signingCertificate.PrivateKey is RSACryptoServiceProvider)
+            if (_signingCertificate.PrivateKey is RSA)
             {
-                var rsa = (RSACryptoServiceProvider)XmlSignatureUtils.GetPrivateKey(_signingCertificate);
-                HashAlgorithm hashAlgorithm = XmlSignatureUtils.GetHashAlgorithm(SigningAlgorithm);
+                var rsa = (RSA)XmlSignatureUtils.GetPrivateKey(_signingCertificate);
+                HashAlgorithmName hashAlgorithmName = XmlSignatureUtils.GetHashAlgorithmName(SigningAlgorithm);
 
-                return rsa.SignData(data, hashAlgorithm);
+                return rsa.SignData(data, hashAlgorithmName, RSASignaturePadding.Pkcs1);
             }
             else
             {
@@ -230,7 +210,7 @@ namespace SAMLSilly.AspNetCore.BindingBuilders
             }
 
             var encoded = Compression.Deflate(value);
-            result.Append(UpperCaseUrlEncode(Uri.EscapeDataString(encoded)));
+            result.Append(Uri.EscapeDataString(encoded));
         }
     }
 }

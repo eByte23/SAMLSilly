@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{55B93DEB
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAMLSilly.Tests", "tests\SAMLSilly.Tests\SAMLSilly.Tests.csproj", "{39FE8EA4-860C-4A15-A09C-B5B9EEF8CFA2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAMLSilly.Validation.Tests", "tests\SAMLSilly.Validation.Tests\SAMLSilly.Validation.Tests.csproj", "{3B3E7EF5-B140-4590-9F5C-6A32235DE79F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,18 @@ Global
 		{39FE8EA4-860C-4A15-A09C-B5B9EEF8CFA2}.Release|x64.Build.0 = Release|Any CPU
 		{39FE8EA4-860C-4A15-A09C-B5B9EEF8CFA2}.Release|x86.ActiveCfg = Release|Any CPU
 		{39FE8EA4-860C-4A15-A09C-B5B9EEF8CFA2}.Release|x86.Build.0 = Release|Any CPU
+		{3B3E7EF5-B140-4590-9F5C-6A32235DE79F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B3E7EF5-B140-4590-9F5C-6A32235DE79F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B3E7EF5-B140-4590-9F5C-6A32235DE79F}.Debug|x64.ActiveCfg = Debug|x64
+		{3B3E7EF5-B140-4590-9F5C-6A32235DE79F}.Debug|x64.Build.0 = Debug|x64
+		{3B3E7EF5-B140-4590-9F5C-6A32235DE79F}.Debug|x86.ActiveCfg = Debug|x86
+		{3B3E7EF5-B140-4590-9F5C-6A32235DE79F}.Debug|x86.Build.0 = Debug|x86
+		{3B3E7EF5-B140-4590-9F5C-6A32235DE79F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B3E7EF5-B140-4590-9F5C-6A32235DE79F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B3E7EF5-B140-4590-9F5C-6A32235DE79F}.Release|x64.ActiveCfg = Release|x64
+		{3B3E7EF5-B140-4590-9F5C-6A32235DE79F}.Release|x64.Build.0 = Release|x64
+		{3B3E7EF5-B140-4590-9F5C-6A32235DE79F}.Release|x86.ActiveCfg = Release|x86
+		{3B3E7EF5-B140-4590-9F5C-6A32235DE79F}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,5 +65,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{75E5BAD2-A20C-43CC-B5C8-38004CEDBDFD} = {512BE8D6-8F5D-4769-B2F9-02299C8B7C95}
 		{39FE8EA4-860C-4A15-A09C-B5B9EEF8CFA2} = {55B93DEB-DB8F-4260-B3F8-4BDB1A01F0B6}
+		{3B3E7EF5-B140-4590-9F5C-6A32235DE79F} = {55B93DEB-DB8F-4260-B3F8-4BDB1A01F0B6}
 	EndGlobalSection
 EndGlobal
